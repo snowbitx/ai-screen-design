@@ -1,0 +1,7 @@
+@import 'tailwindcss';
+@import './variable.scss';
+@import './global.scss';
+@theme {
+  /*调整tailwind基准值，w-20 表示 w-20px*/
+  --spacing: 1px;
+}
