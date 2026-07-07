@@ -4,7 +4,7 @@ interface Layout {
   width: number
   height: number
 }
-interface MaterialSchema {
+export interface MaterialSchema {
   type: string
   name: string
   id: string
@@ -17,6 +17,6 @@ export interface MaterialDefinition {
   name: string
   group: string
   icon: string
-  // dsl中不需要id id为基础唯一标识
+  // 初始化物料时不需要id，id只在运行时需要 会拖拽drop时存入
   schema: Omit<MaterialSchema, 'id'>
 }

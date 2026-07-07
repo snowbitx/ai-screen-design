@@ -1,9 +1,15 @@
-import type { MaterialDefinition } from '@/material/types.ts'
-
+import type { MaterialDefinition, MaterialSchema } from '@/material/types.ts'
+// 存放所有的物料
 const materials: MaterialDefinition[] = []
-export function register(material: MaterialDefinition) {
+
+// 每个物料注册时都和对应的组件建立关联关系 text => TextMaterial  bar=>ChartMaterial
+const componentMap = new Map()
+
+export function register(material: MaterialDefinition, component: Component) {
   materials.push(material)
+  componentMap.set(material.schema.type, component)
 }
+
 //默认是异步，eager是true则变成同步
 const materialModules = import.meta.glob('./*/index.ts', { eager: true })
 
@@ -31,4 +37,17 @@ export function getMaterialByGroup(group: string) {
 
 export function getMaterialGroups() {
   return groups
+}
+
+// 通过schema中的type找到对应的组件
+export function getMaterialComponent(type: string) {
+  return componentMap.get(type)
+}
+
+// 创建物料实例 存的物料dsl
+export function createNode(node: MaterialSchema) {
+  return {
+    ...node,
+    id: window.crypto.randomUUID(),
+  }
 }

@@ -2,11 +2,15 @@
 defineOptions({
   name: 'MaterialItem',
 })
-defineProps(['material'])
+const props = defineProps(['material'])
+
+function onStart(e: DragEvent) {
+  e.dataTransfer.setData('scheme', JSON.stringify(props.material.schema))
+}
 </script>
 
 <template>
-  <div class="material-item">
+  <div class="material-item" draggable="true" @dragstart="onStart">
     <div class="title">{{ material.name }}</div>
     <div class="icon">
       <Icon :icon="material.icon" width="80"></Icon>

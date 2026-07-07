@@ -1,4 +1,5 @@
 import type { MaterialDefinition } from '@/material/types.ts'
+import TextMaterial from './component.vue'
 
 const textMaterial: MaterialDefinition = {
   // 物料元数据
@@ -16,7 +17,7 @@ const textMaterial: MaterialDefinition = {
       height: 50,
     },
     style: {
-      color: 'black',
+      color: '#ff0',
     },
     props: {
       content: 'hello world',
@@ -25,5 +26,5 @@ const textMaterial: MaterialDefinition = {
 }
 
 export function install(regisiter) {
-  regisiter(textMaterial)
+  regisiter(textMaterial, TextMaterial)
 }
