@@ -4,7 +4,6 @@ import ScreenEditor from '@/editor/index.vue'
 
 <template>
   <ScreenEditor />
-  <!--  <Sc-->
 </template>
 
 <style scoped lang="scss">

@@ -1,15 +1,16 @@
-const materials = [
-  {
-    name: '柱状图',
-    group: 'charts',
-    icon: 'fluent-color:list-bar-16',
-  },
-  {
-    name: '文本',
-    group: 'info',
-    icon: 'solar:text-bold',
-  },
-]
+import type { MaterialDefinition } from '@/material/types.ts'
+
+const materials: MaterialDefinition[] = []
+export function register(material: MaterialDefinition) {
+  materials.push(material)
+}
+//默认是异步，eager是true则变成同步
+const materialModules = import.meta.glob('./*/index.ts', { eager: true })
+
+Object.values(materialModules).forEach((materialModule) => {
+  // @ts-expect-error 忽略ts错误
+  materialModule.install(register)
+})
 
 export const groups = [
   {
