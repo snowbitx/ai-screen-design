@@ -12,7 +12,7 @@ defineOptions({
 
 const { panelVisible } = useEditorStore()
 
-const meterialWidth = computed(() => (panelVisible.material ? '260px' : 0))
+const materialWidth = computed(() => (panelVisible.material ? '260px' : 0))
 const layerWidth = computed(() => (panelVisible.layer ? '160px' : 0))
 const propertyWidth = computed(() => (panelVisible.property ? '260px' : 0))
 </script>
@@ -26,7 +26,7 @@ const propertyWidth = computed(() => (panelVisible.property ? '260px' : 0))
     </header>
     <main class="flex h-[calc(100%-56px)]">
       <!--      物料-->
-      <aside class="material overflow-hidden transition-all" :style="{ width: meterialWidth }">
+      <aside class="material overflow-hidden transition-all" :style="{ width: materialWidth }">
         <MaterialPanel />
       </aside>
       <!--      图层-->
