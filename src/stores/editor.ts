@@ -16,7 +16,11 @@ export const useEditorStore = defineStore('editor', () => {
   // 当前编辑器组件列表
   const nodes = ref<MaterialSchema[]>([])
   // 当前选中节点的id
-  const selectedNodeId = ref()
+  const selectedNodeIds = ref([])
+  // 支持多选后，拿多选的结构来维护，这样可以共用清除选中
+  const selectedNodeId = computed(() => {
+    return selectedNodeIds.value.length === 1 ? selectedNodeIds.value[0] : null
+  })
   // 当前选中的节点
   const selectedNode = computed(() => {
     return nodes.value.find((node) => node.id === selectedNodeId.value)
@@ -25,21 +29,35 @@ export const useEditorStore = defineStore('editor', () => {
   function addNode(node: MaterialSchema) {
     nodes.value.push(node)
   }
-
+  /**
+   * 单选方法
+   */
   function selectNode(id: string) {
-    selectedNodeId.value = id
+    selectedNodeIds.value = [id]
+  }
+  /**
+   * 多选节点
+   */
+  function selectNodes(ids: string[]) {
+    selectedNodeIds.value = ids
   }
 
+  function findNode(id: string) {
+    return nodes.value.find((node) => node.id === id)
+  }
   function clearSelected() {
-    selectedNodeId.value = null
+    selectedNodeIds.value = []
   }
   return {
     panelVisible,
     nodes,
     selectedNodeId,
     selectedNode,
+    selectedNodeIds,
     addNode,
     selectNode,
     clearSelected,
+    selectNodes,
+    findNode,
   }
 })

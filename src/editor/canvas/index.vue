@@ -2,19 +2,26 @@
 import type { MaterialSchema } from '@/material/types.ts'
 import { createNode, getMaterialComponent } from '@/material'
 import type { CSSProperties } from 'vue'
-import Moveable, { type OnDrag, type OnResize } from 'vue3-moveable'
+import Moveable, {
+  type OnDrag,
+  type OnResize,
+  type OnDragGroup,
+  type OnResizeGroup,
+} from 'vue3-moveable'
+import Selecto from 'vue3-selecto'
 import { useEditorStore } from '@/stores/editor.ts'
 import { storeToRefs } from 'pinia'
 defineOptions({
   name: 'CanvasRoot',
 })
 const moveableRef = useTemplateRef('moveableRef')
+const stageRef = useTemplateRef('stage')
 
 const selectedTarget = shallowRef<HTMLElement>()
 
 const editorStore = useEditorStore()
 // storeToRefs只能解构属性，方法必须手动取
-const { nodes, selectedNode } = storeToRefs(editorStore)
+const { nodes } = storeToRefs(editorStore)
 
 const vm = getCurrentInstance()
 function onDrop(e: DragEvent) {
@@ -59,23 +66,26 @@ function onSelect(node: MaterialSchema, e: MouseEvent) {
   })
 }
 
-function onDrag(e: OnDrag) {
-  console.log('onDrag', e, selectedNode.value)
-  // 动态绑定的style是异步的，所以直接修改dom上的style保证拖动不漂移
-  selectedTarget.value.style.left = e.left + 'px'
-  selectedTarget.value.style.top = e.top + 'px'
+function getNodeByTarget(element: HTMLElement) {
+  const id = element.getAttribute('data-node-id')
+  return editorStore.findNode(id)
+}
 
-  selectedNode.value.layout.x = e.left
-  selectedNode.value.layout.y = e.top
+function onDrag(e: OnDrag) {
+  // 动态绑定的style是异步的，所以直接修改dom上的style保证拖动不漂移
+  e.target.style.left = e.left + 'px'
+  e.target.style.top = e.top + 'px'
+  const node = getNodeByTarget(e.target as HTMLElement)
+  node.layout.x = e.left
+  node.layout.y = e.top
 }
 
 function onResize(e: OnResize) {
-  console.log('onResize', e, selectedNode.value)
-  selectedTarget.value.style.width = e.width + 'px'
-  selectedTarget.value.style.height = e.height + 'px'
-
-  selectedNode.value.layout.width = e.width
-  selectedNode.value.layout.height = e.height
+  e.target.style.width = e.width + 'px'
+  e.target.style.height = e.height + 'px'
+  const node = getNodeByTarget(e.target as HTMLElement)
+  node.layout.width = e.width
+  node.layout.height = e.height
   // 发现拖动时拖动左边会往右扩大。原因是往左拖动时宽度变了x轴没变，所以要手动更新下x轴和y轴
   onDrag(e.drag)
 }
@@ -84,12 +94,33 @@ function onClearSelected() {
   editorStore.clearSelected()
   selectedTarget.value = null
 }
+
+function onSelectEnd(e) {
+  selectedTarget.value = e.selected
+  const ids = e.selected.map((element) => element.getAttribute('data-node-id'))
+  editorStore.selectNodes(ids)
+}
+
+function onDragGroup(e: OnDragGroup) {
+  // 框选多个拖拽时可拿到多个event数组，此时遍历数组调拖拽即可
+  e.events.forEach(onDrag)
+}
+
+function onResizeGroup(e: OnResizeGroup) {
+  e.events.forEach(onResize)
+}
 </script>
 
 <template>
   <div class="canvas-root">
     <!--    画布台-->
-    <div class="canvas-stage" @dragover.prevent @drop="onDrop" @mousedown.self="onClearSelected">
+    <div
+      ref="stage"
+      class="canvas-stage"
+      @dragover.prevent
+      @drop="onDrop"
+      @mousedown.self="onClearSelected"
+    >
       <div
         class="canvas-node"
         v-for="node in nodes"
@@ -101,6 +132,21 @@ function onClearSelected() {
         <component :is="getMaterialComponent(node.type)" :schema="node"></component>
       </div>
     </div>
+    <!--    框选组件 和moveable为同一个作者-->
+    <!--    container拖拽的框要挂在哪个节点下，挂到画布上面-->
+
+    <!--    加v-if是避免在所有容器都可以框选：挂载时stageRef为undefined-->
+    <!--    selectedFromInside 选中节点的时候也可以触发选区-->
+    <Selecto
+      v-if="stageRef"
+      :container="stageRef"
+      :dragContainer="stageRef"
+      :selectedFromInside="false"
+      :toggleContinueSelect="'shift'"
+      :selectableTargets="['.canvas-node']"
+      @selectEnd="onSelectEnd"
+    />
+    <!--    节点移动缩放组件-->
     <Moveable
       ref="moveableRef"
       :target="selectedTarget"
@@ -108,7 +154,9 @@ function onClearSelected() {
       :resizable="true"
       :draggable="true"
       @drag="onDrag"
+      @dragGroup="onDragGroup"
       @resize="onResize"
+      @resizeGroup="onResizeGroup"
     />
   </div>
 </template>
