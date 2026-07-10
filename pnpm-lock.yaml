@@ -32,6 +32,9 @@ importers:
       vue3-selecto:
         specifier: ^1.12.3
         version: 1.12.3
+      vue3-sketch-ruler:
+        specifier: 2.4.0
+        version: 2.4.0
     devDependencies:
       '@iconify/vue':
         specifier: ^5.0.1
@@ -2250,6 +2253,9 @@ packages:
   vue3-selecto@1.12.3:
     resolution: {integrity: sha512-zIQLwuvjTNaivITLbBAnm6Sh8BFRG8QocNZLzKvqRIqnpRa2lvlIw9+l1wdI/84msh8cSNIdiWsgote62cgtHA==}
 
+  vue3-sketch-ruler@2.4.0:
+    resolution: {integrity: sha512-ZbkVPxq/Jz7A13k6BKVjbeOiHmafNYr3Hgxl9i+u6EpGmlMYSKwo9fFr0NQ+T9enogSLMgdO8NcSxEiqstJ2Dw==}
+
   vue@3.5.39:
     resolution: {integrity: sha512-xmZCYabFGcirU8r0fTuvl/LICc1OU620rnqepaJDL/a141ZigkG7AyaxQLdqJ02ZRYzWe6YPaDHeQx7MfknQfA==}
     peerDependencies:
@@ -4378,6 +4384,8 @@ snapshots:
   vue3-selecto@1.12.3:
     dependencies:
       selecto: 1.26.3
+
+  vue3-sketch-ruler@2.4.0: {}
 
   vue@3.5.39(typescript@6.0.3):
     dependencies:

@@ -9,8 +9,12 @@ import Moveable, {
   type OnResizeGroup,
 } from 'vue3-moveable'
 import Selecto from 'vue3-selecto'
+
+import SketchRuler from 'vue3-sketch-ruler'
+import 'vue3-sketch-ruler/lib/style.css'
 import { useEditorStore } from '@/stores/editor.ts'
 import { storeToRefs } from 'pinia'
+import { debounce } from '@/util'
 defineOptions({
   name: 'CanvasRoot',
 })
@@ -22,6 +26,54 @@ const selectedTarget = shallowRef<HTMLElement>()
 const editorStore = useEditorStore()
 // storeToRefs只能解构属性，方法必须手动取
 const { nodes } = storeToRefs(editorStore)
+
+const palette = {
+  bgColor: '#1f2937',
+  longfgColor: '#6b7280',
+  fontColor: '#9ca3af',
+  fontShadowColor: '#0e8da7',
+  shadowColor: 'rgba(14, 141, 167, 0.14)',
+  lineColor: '#22c55e',
+  lineType: 'solid',
+  lockLineColor: '#4b5563',
+  borderColor: '#374151',
+  hoverBg: '#111827',
+  hoverColor: '#ffffff',
+}
+
+const lines = ref({ h: [], v: [] })
+const scale = ref(1)
+const canvasRoot = useTemplateRef('canvasRoot')
+const rectWidth = ref(1000)
+const rectHeight = ref(800)
+
+const onRootResize = debounce((rect) => {
+  rectWidth.value = rect.width
+  rectHeight.value = rect.height
+}, 300)
+
+const canvasWidth = ref(1920)
+const canvasHeight = ref(1080)
+const canvasStyle = computed(() => {
+  return {
+    width: canvasWidth.value + 'px',
+    height: canvasHeight.value + 'px',
+  }
+})
+onMounted(() => {
+  const { width, height } = canvasRoot.value.getBoundingClientRect()
+  rectWidth.value = width
+  rectHeight.value = height
+  // 监听尺寸变化 当画布变更时更新标尺
+  const ob = new ResizeObserver((entries) => {
+    const rect = entries[0].contentRect
+    onRootResize(rect)
+  })
+  ob.observe(canvasRoot.value)
+  onUnmounted(() => {
+    ob.disconnect()
+  })
+})
 
 const vm = getCurrentInstance()
 function onDrop(e: DragEvent) {
@@ -109,29 +161,48 @@ function onDragGroup(e: OnDragGroup) {
 function onResizeGroup(e: OnResizeGroup) {
   e.events.forEach(onResize)
 }
+
+function onZoomChange() {
+  // 缩放和拖动画布时更新moveable中节点的位置
+  moveableRef.value.updateRect()
+}
 </script>
 
 <template>
-  <div class="canvas-root">
-    <!--    画布台-->
-    <div
-      ref="stage"
-      class="canvas-stage"
-      @dragover.prevent
-      @drop="onDrop"
-      @mousedown.self="onClearSelected"
+  <div class="canvas-root" ref="canvasRoot">
+    <SketchRuler
+      v-model:scale="scale"
+      :thick="20"
+      :palette="palette"
+      :width="rectWidth"
+      :height="rectHeight"
+      :canvasWidth="canvasWidth"
+      :canvasHeight="canvasHeight"
+      :lines="lines"
+      @zoomchange="onZoomChange"
     >
+      <!--    画布台-->
       <div
-        class="canvas-node"
-        v-for="node in nodes"
-        :key="node.id"
-        :style="getNodeStyle(node)"
-        :data-node-id="node.id"
-        @mousedown="onSelect(node, $event)"
+        ref="stage"
+        class="canvas-stage"
+        :style="canvasStyle"
+        @dragover.prevent
+        @drop="onDrop"
+        @mousedown.self="onClearSelected"
       >
-        <component :is="getMaterialComponent(node.type)" :schema="node"></component>
+        <div
+          class="canvas-node"
+          v-for="node in nodes"
+          :key="node.id"
+          :style="getNodeStyle(node)"
+          :data-node-id="node.id"
+          @mousedown="onSelect(node, $event)"
+        >
+          <component :is="getMaterialComponent(node.type)" :schema="node"></component>
+        </div>
       </div>
-    </div>
+    </SketchRuler>
+
     <!--    框选组件 和moveable为同一个作者-->
     <!--    container拖拽的框要挂在哪个节点下，挂到画布上面-->
 
@@ -164,10 +235,7 @@ function onResizeGroup(e: OnResizeGroup) {
 <style scoped lang="scss">
 .canvas-root {
   .canvas-stage {
-    width: 600px;
-    height: 600px;
     background: bg-mix(40);
-    margin: 100px;
     //@apply relative;
     position: relative;
     .canvas-node {
