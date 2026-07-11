@@ -21,11 +21,22 @@ defineOptions({
 const moveableRef = useTemplateRef('moveableRef')
 const stageRef = useTemplateRef('stage')
 
-const selectedTarget = shallowRef<HTMLElement>()
+const selectedTarget = shallowRef<HTMLElement[]>()
 
 const editorStore = useEditorStore()
 // storeToRefs只能解构属性，方法必须手动取
-const { nodes } = storeToRefs(editorStore)
+const { nodes, selectedNodeIds } = storeToRefs(editorStore)
+
+// 选中的节点变化时同步 movable的选中效果  手动更新selectedTarget的就可以删掉了
+watch(
+  selectedNodeIds,
+  (ids) => {
+    selectedTarget.value = ids.map((id) => {
+      return stageRef.value.querySelector(`[data-node-id="${id}"]`)
+    })
+  },
+  { deep: true, flush: 'post' },
+)
 
 const palette = {
   bgColor: '#1f2937',
@@ -75,7 +86,6 @@ onMounted(() => {
   })
 })
 
-const vm = getCurrentInstance()
 function onDrop(e: DragEvent) {
   const data = e.dataTransfer.getData('scheme')
   const node = createNode(JSON.parse(data))
@@ -85,21 +95,19 @@ function onDrop(e: DragEvent) {
   editorStore.addNode(node)
   // 拖放过来立即选中,此时node还没渲染出来 所以target要通过css取dom上的节点
   editorStore.selectNode(node.id)
-  nextTick(() => {
-    // 不使用document查是防止其他页面有相同的选择器，从当前组件根节点开始查找
-    selectedTarget.value = vm.proxy.$el.querySelector(`[data-node-id='${node.id}']`)
-  })
 }
 
 // 移动：改css  left top
 // 尺寸：改css width height
 
-function getNodeStyle(node: MaterialSchema): CSSProperties {
+function getNodeStyle(node: MaterialSchema, index: number): CSSProperties {
   return {
     width: node.layout.width + 'px',
     height: node.layout.height + 'px',
     left: node.layout.x + 'px',
     top: node.layout.y + 'px',
+    // 图层
+    zIndex: index + 1,
   }
 }
 
@@ -108,7 +116,6 @@ function getNodeStyle(node: MaterialSchema): CSSProperties {
  */
 function onSelect(node: MaterialSchema, e: MouseEvent) {
   // 事件会冒泡，避免使用target拿到冒泡的节点，使用currentTarget拿到绑定mouseDown的真实target
-  selectedTarget.value = e.currentTarget as HTMLElement
   editorStore.selectNode(node.id)
   /**
    * moveable首次拖放进来后直接拖拽不生效，手动触发一下
@@ -144,11 +151,9 @@ function onResize(e: OnResize) {
 
 function onClearSelected() {
   editorStore.clearSelected()
-  selectedTarget.value = null
 }
 
 function onSelectEnd(e) {
-  selectedTarget.value = e.selected
   const ids = e.selected.map((element) => element.getAttribute('data-node-id'))
   editorStore.selectNodes(ids)
 }
@@ -192,9 +197,9 @@ function onZoomChange() {
       >
         <div
           class="canvas-node"
-          v-for="node in nodes"
+          v-for="(node, index) in nodes"
           :key="node.id"
-          :style="getNodeStyle(node)"
+          :style="getNodeStyle(node, index)"
           :data-node-id="node.id"
           @mousedown="onSelect(node, $event)"
         >
