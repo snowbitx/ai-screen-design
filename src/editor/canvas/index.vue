@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { MaterialSchema } from '@/material/types.ts'
 import { createNode, getMaterialComponent } from '@/material'
 import type { CSSProperties } from 'vue'
 import Moveable, {
@@ -15,6 +14,7 @@ import 'vue3-sketch-ruler/lib/style.css'
 import { useEditorStore } from '@/stores/editor.ts'
 import { storeToRefs } from 'pinia'
 import { debounce } from '@/util'
+import type { MaterialSchema } from '@/schema/material.ts'
 defineOptions({
   name: 'CanvasRoot',
 })
@@ -25,7 +25,7 @@ const selectedTarget = shallowRef<HTMLElement[]>()
 
 const editorStore = useEditorStore()
 // storeToRefs只能解构属性，方法必须手动取
-const { nodes, selectedNodeIds } = storeToRefs(editorStore)
+const { nodes, selectedNodeIds, canvas } = storeToRefs(editorStore)
 
 // 选中的节点变化时同步 movable的选中效果  手动更新selectedTarget的就可以删掉了
 watch(
@@ -63,12 +63,14 @@ const onRootResize = debounce((rect) => {
   rectHeight.value = rect.height
 }, 300)
 
-const canvasWidth = ref(1920)
-const canvasHeight = ref(1080)
+const canvasWidth = toRef(canvas.value, 'width')
+const canvasHeight = toRef(canvas.value, 'height')
+
 const canvasStyle = computed(() => {
   return {
     width: canvasWidth.value + 'px',
     height: canvasHeight.value + 'px',
+    backgroundColor: canvas.value.backgroundColor,
   }
 })
 onMounted(() => {
@@ -240,7 +242,6 @@ function onZoomChange() {
 <style scoped lang="scss">
 .canvas-root {
   .canvas-stage {
-    background: bg-mix(40);
     //@apply relative;
     position: relative;
     .canvas-node {

@@ -1,4 +1,4 @@
-import type { MaterialDefinition, MaterialSchema } from '@/material/types.ts'
+import type { MaterialDefinition, MaterialSchema } from '@/schema/material.ts'
 // 存放所有的物料
 const materials: MaterialDefinition[] = []
 
