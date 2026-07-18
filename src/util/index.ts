@@ -14,7 +14,6 @@ export function getValue(target, key) {
   while (keys.length) {
     target = target[keys.shift()]
   }
-  console.log('target ==> ', target)
   return target
 }
 // setValue(obj,'props.content')

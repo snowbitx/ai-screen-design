@@ -62,6 +62,37 @@ export const useEditorStore = defineStore('editor', () => {
   function clearSelected() {
     selectedNodeIds.value = []
   }
+
+  function copyNode(node: MaterialSchema) {
+    console.log(111)
+    // 转json是因为和后端交互需要用json 所以此处用json做深拷贝
+    const newNode = JSON.parse(JSON.stringify(node))
+    newNode.id = crypto.randomUUID()
+    newNode.layout.x += 20
+    newNode.layout.y += 20
+    addNode(newNode)
+    selectNode(newNode)
+  }
+  function removeNode(node: MaterialSchema) {
+    nodes.value = nodes.value.filter((item) => item.id !== node.id)
+    selectedNodeIds.value = selectedNodeIds.value.filter((id) => id !== node.id)
+  }
+  // 置顶 删掉当前放到最前面
+  function moveTop(node: MaterialSchema) {
+    const index = selectedNodeIds.value.findIndex((item) => item.id === node.id)
+    nodes.value.splice(index, 1)
+    nodes.value.unshift(node)
+  }
+  function moveBottom(node: MaterialSchema) {
+    const index = selectedNodeIds.value.findIndex((item) => item.id === node.id)
+    nodes.value.splice(index, 1)
+    nodes.value.push(node)
+  }
+
+  // 切换锁定
+  function toggleLock(node: MaterialSchema) {
+    node.locked = !node.locked
+  }
   return {
     panelVisible,
     nodes,
@@ -74,5 +105,10 @@ export const useEditorStore = defineStore('editor', () => {
     selectNodes,
     findNode,
     canvas,
+    copyNode,
+    removeNode,
+    moveTop,
+    moveBottom,
+    toggleLock,
   }
 })

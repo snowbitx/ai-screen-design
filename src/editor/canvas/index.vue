@@ -32,7 +32,8 @@ watch(
   selectedNodeIds,
   (ids) => {
     selectedTarget.value = ids.map((id) => {
-      return stageRef.value.querySelector(`[data-node-id="${id}"]`)
+      // id相同不能被锁定
+      return stageRef.value.querySelector(`[data-node-id="${id}"]:not([data-node-locked='true'])`)
     })
   },
   { deep: true, flush: 'post' },
@@ -173,6 +174,24 @@ function onZoomChange() {
   // 缩放和拖动画布时更新moveable中节点的位置
   moveableRef.value.updateRect()
 }
+
+const commandMap = {
+  copy: () => editorStore.copyNode(editorStore.selectedNode),
+  remove: () => editorStore.removeNode(editorStore.selectedNode),
+  // 颠倒是因为视觉上 物料反转了
+  moveBottom: () => editorStore.moveTop(editorStore.selectedNode),
+  moveTop: () => editorStore.moveBottom(editorStore.selectedNode),
+  toggleLock: () => {
+    editorStore.toggleLock(editorStore.selectedNode)
+    // 单选右键锁定后不展示框选状态
+    selectedTarget.value = []
+  },
+}
+
+// 组件节点右键菜单
+function onCommand(command: string) {
+  commandMap[command]()
+}
 </script>
 
 <template>
@@ -197,16 +216,34 @@ function onZoomChange() {
         @drop="onDrop"
         @mousedown.self="onClearSelected"
       >
-        <div
-          class="canvas-node"
+        <!--        给节点加右键菜单-->
+        <el-dropdown
           v-for="(node, index) in nodes"
           :key="node.id"
-          :style="getNodeStyle(node, index)"
-          :data-node-id="node.id"
-          @mousedown="onSelect(node, $event)"
+          trigger="contextmenu"
+          @command="onCommand"
         >
-          <component :is="getMaterialComponent(node.type)" :schema="node"></component>
-        </div>
+          <div
+            class="canvas-node"
+            :style="getNodeStyle(node, index)"
+            :data-node-id="node.id"
+            :data-node-locked="node.locked"
+            @mousedown="onSelect(node, $event)"
+          >
+            <component :is="getMaterialComponent(node.type)" :schema="node"></component>
+          </div>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item command="copy">复制</el-dropdown-item>
+              <el-dropdown-item command="remove">移除</el-dropdown-item>
+              <el-dropdown-item command="moveTop">置顶</el-dropdown-item>
+              <el-dropdown-item command="moveBottom">置底</el-dropdown-item>
+              <el-dropdown-item command="toggleLock">{{
+                node.locked ? '解锁' : '锁定'
+              }}</el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
       </div>
     </SketchRuler>
 
