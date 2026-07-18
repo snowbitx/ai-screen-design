@@ -4,10 +4,12 @@ const materials: MaterialDefinition[] = []
 
 // 每个物料注册时都和对应的组件建立关联关系 text => TextMaterial  bar=>ChartMaterial
 const componentMap = new Map()
+const settersMap = new Map()
 
 export function register(material: MaterialDefinition, component: Component) {
   materials.push(material)
   componentMap.set(material.schema.type, component)
+  settersMap.set(material.schema.type, material.setters)
 }
 
 //默认是异步，eager是true则变成同步
@@ -42,6 +44,10 @@ export function getMaterialGroups() {
 // 通过schema中的type找到对应的组件
 export function getMaterialComponent(type: string) {
   return componentMap.get(type)
+}
+// 通过schema中的type找到对应的表单配置getters
+export function getMaterialSetters(type: string) {
+  return settersMap.get(type)
 }
 
 // 创建物料实例 存的物料dsl

@@ -5,6 +5,7 @@ import { useEditorStore } from '@/stores/editor.ts'
 import MaterialPanel from '@/editor/panels/material/index.vue'
 import LayerPanel from '@/editor/panels/layer/index.vue'
 import CanvasRoot from '@/editor/canvas/index.vue'
+import PropertyPanel from '@/editor/property/index.vue'
 
 defineOptions({
   name: 'ScreenEditor',
@@ -14,7 +15,7 @@ const { panelVisible } = useEditorStore()
 
 const materialWidth = computed(() => (panelVisible.material ? '260px' : 0))
 const layerWidth = computed(() => (panelVisible.layer ? '160px' : 0))
-const propertyWidth = computed(() => (panelVisible.property ? '260px' : 0))
+const propertyWidth = computed(() => (panelVisible.property ? '360px' : 0))
 </script>
 
 <template>
@@ -37,7 +38,7 @@ const propertyWidth = computed(() => (panelVisible.property ? '260px' : 0))
       <CanvasRoot class="canvas flex-1" />
       <!--      属性-->
       <aside class="property overflow-hidden transition-all" :style="{ width: propertyWidth }">
-        属性
+        <PropertyPanel />
       </aside>
     </main>
   </div>

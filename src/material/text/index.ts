@@ -6,6 +6,19 @@ const textMaterial: MaterialDefinition = {
   name: '文本',
   group: 'info',
   icon: 'solar:text-bold',
+  // 表单的配置
+  setters: [
+    {
+      type: 'input',
+      label: '内容',
+      key: 'props.content',
+    },
+    {
+      type: 'color',
+      label: '颜色',
+      key: 'style.color',
+    },
+  ],
   // DSL设计
   schema: {
     type: 'text',
