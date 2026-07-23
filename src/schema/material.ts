@@ -9,7 +9,7 @@ export interface MaterialSchema {
   type: string
   name: string
   id: string
-  locked: boolean
+  locked?: boolean
   layout: Layout
   style: Record<string, any>
   props: Record<string, any>
