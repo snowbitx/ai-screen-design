@@ -804,7 +804,7 @@ packages:
       - '@napi-rs/wasm-runtime'
       - '@emnapi/core'
       - '@emnapi/runtime'
-      - '@tybys/wasm-util'
+      - '@tybys/wasm-utils'
       - '@emnapi/wasi-threads'
       - tslib
 

@@ -27,21 +27,3 @@ declare module 'vue' {
     RouterView: typeof import('vue-router')['RouterView']
   }
 }
-
-// For TSX support
-declare global {
-  const ElButton: (typeof import('element-plus/es'))['ElButton']
-  const ElCol: (typeof import('element-plus/es'))['ElCol']
-  const ElCollapse: (typeof import('element-plus/es'))['ElCollapse']
-  const ElCollapseItem: (typeof import('element-plus/es'))['ElCollapseItem']
-  const ElColorPicker: (typeof import('element-plus/es'))['ElColorPicker']
-  const ElDropdown: (typeof import('element-plus/es'))['ElDropdown']
-  const ElDropdownItem: (typeof import('element-plus/es'))['ElDropdownItem']
-  const ElDropdownMenu: (typeof import('element-plus/es'))['ElDropdownMenu']
-  const ElForm: (typeof import('element-plus/es'))['ElForm']
-  const ElFormItem: (typeof import('element-plus/es'))['ElFormItem']
-  const ElInputNumber: (typeof import('element-plus/es'))['ElInputNumber']
-  const ElRow: (typeof import('element-plus/es'))['ElRow']
-  const RouterLink: (typeof import('vue-router'))['RouterLink']
-  const RouterView: (typeof import('vue-router'))['RouterView']
-}

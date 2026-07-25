@@ -1,4 +1,4 @@
-import { debounce } from '@/util'
+import { debounce } from '@/utils'
 import { useEditorStore } from '@/stores/editor.ts'
 import { storeToRefs } from 'pinia'
 
