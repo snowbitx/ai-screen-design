@@ -5,7 +5,7 @@
 - [项目架构设计文档](./docs/architecture-design.md)
 - [项目学习笔记](./docs/project-learning-guide.md)
 
-## 1.redo undo实现方案
+### 1.redo undo实现方案
 - 1.备忘录模式
   存快照，深拷贝，缺点：浪费空间
 - 2.命令模式

@@ -1,17 +1,17 @@
 import { defineStore } from 'pinia'
-
 import type { MaterialSchema } from '@/schema/material.ts'
 import type { PageSchema } from '@/schema/page.ts'
+import { useUndoRedo } from '@/editor/useUndoRedo.ts'
 
 export const useEditorStore = defineStore('editor', () => {
-  // 布局组件控制物料，图层，属性面板的现实隐藏
+  const { applyChange } = useUndoRedo()
+
   const panelVisible = reactive({
     material: true,
     layer: true,
     property: true,
   })
 
-  // 方便保存数据，和后端交互
   const page = ref<PageSchema>({
     canvas: {
       width: 1920,
@@ -35,13 +35,20 @@ export const useEditorStore = defineStore('editor', () => {
   const selectedNodeId = computed(() => {
     return selectedNodeIds.value.length === 1 ? selectedNodeIds.value[0] : null
   })
-  // 当前选中的节点
+
+  /**
+   * 当前选中的节点
+   */
   const selectedNode = computed(() => {
     return nodes.value.find((node) => node.id === selectedNodeId.value)
   })
 
+  function setNodes(newNodes) {
+    applyChange(nodes, 'value', newNodes)
+  }
+
   function addNode(node: MaterialSchema) {
-    nodes.value.push(node)
+    setNodes([...nodes.value, node])
   }
   /**
    * 单选方法
@@ -49,9 +56,7 @@ export const useEditorStore = defineStore('editor', () => {
   function selectNode(id: string) {
     selectedNodeIds.value = [id]
   }
-  /**
-   * 多选节点
-   */
+
   function selectNodes(ids: string[]) {
     selectedNodeIds.value = ids
   }
@@ -59,13 +64,12 @@ export const useEditorStore = defineStore('editor', () => {
   function findNode(id: string) {
     return nodes.value.find((node) => node.id === id)
   }
+
   function clearSelected() {
     selectedNodeIds.value = []
   }
 
   function copyNode(node: MaterialSchema) {
-    console.log(111)
-    // 转json是因为和后端交互需要用json 所以此处用json做深拷贝
     const newNode = JSON.parse(JSON.stringify(node))
     newNode.id = crypto.randomUUID()
     newNode.layout.x += 20
@@ -73,38 +77,40 @@ export const useEditorStore = defineStore('editor', () => {
     addNode(newNode)
     selectNode(newNode)
   }
+
   function removeNode(node: MaterialSchema) {
-    nodes.value = nodes.value.filter((item) => item.id !== node.id)
+    setNodes(nodes.value.filter((item) => item.id !== node.id))
     selectedNodeIds.value = selectedNodeIds.value.filter((id) => id !== node.id)
   }
-  // 置顶 删掉当前放到最前面
   function moveTop(node: MaterialSchema) {
-    const index = selectedNodeIds.value.findIndex((item) => item.id === node.id)
-    nodes.value.splice(index, 1)
-    nodes.value.unshift(node)
+    // [c,a,b,d]
+    const index = nodes.value.findIndex((item) => item.id === node.id)
+    const splicedNodes = nodes.value.toSpliced(index, 1)
+    setNodes([node, ...splicedNodes])
   }
   function moveBottom(node: MaterialSchema) {
-    const index = selectedNodeIds.value.findIndex((item) => item.id === node.id)
-    nodes.value.splice(index, 1)
-    nodes.value.push(node)
+    // [c,a,b,d]
+    const index = nodes.value.findIndex((item) => item.id === node.id)
+    const splicedNodes = nodes.value.toSpliced(index, 1)
+    setNodes([...splicedNodes, node])
   }
 
-  // 切换锁定
   function toggleLock(node: MaterialSchema) {
-    node.locked = !node.locked
+    applyChange(node, 'locked', !node.locked)
   }
   return {
     panelVisible,
     nodes,
-    selectedNodeId,
-    selectedNode,
-    selectedNodeIds,
-    addNode,
-    selectNode,
-    clearSelected,
-    selectNodes,
-    findNode,
+    page,
     canvas,
+    selectedNode,
+    selectNode,
+    addNode,
+    selectedNodeId,
+    selectedNodeIds,
+    selectNodes,
+    clearSelected,
+    findNode,
     copyNode,
     removeNode,
     moveTop,

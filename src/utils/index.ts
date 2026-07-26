@@ -21,7 +21,8 @@ export function setValue(target, key, value) {
   // key 'props.content' 找到 obj.xxx.props.content的 最后一级props.content即可。
   const keys = key.split('.')
   const lastKey = keys.pop() // 此时keys 已经到了props这级
-  const _target = getValue(target, keys.join('.'))
-  _target[lastKey] = value
-  // return value
+  if (keys.length) {
+    target = getValue(target, keys.join('.'))
+  }
+  target[lastKey] = value
 }

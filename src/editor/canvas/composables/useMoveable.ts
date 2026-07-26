@@ -1,16 +1,43 @@
 import type { OnDrag, OnDragGroup, OnResize, OnResizeGroup } from 'vue3-moveable'
 import { useEditorStore } from '@/stores/editor.ts'
+import { useUndoRedo } from '@/editor/useUndoRedo.ts'
 
-export function useMoveable() {
+export function useMoveable(moveableRef) {
+  const { applyChange, startBatch, commitBatch } = useUndoRedo()
   const editorStore = useEditorStore()
+
+  // 当 layout 发生变化后，手动更新 moveable 的选框
+  watch(
+    () =>
+      editorStore.nodes.map((node) => {
+        return node.layout
+      }),
+    () => {
+      // 手动更新的方法
+      moveableRef.value.updateRect(undefined, true)
+    },
+    {
+      flush: 'post',
+    },
+  )
+
+  function onStart() {
+    startBatch()
+  }
+
+  function onEnd() {
+    commitBatch()
+  }
   function onDrag(e: OnDrag) {
     // 动态绑定的style是异步的，所以直接修改dom上的style保证拖动不漂移
     e.target.style.left = e.left + 'px'
     e.target.style.top = e.top + 'px'
-
     const node = getNodeByTarget(e.target as HTMLElement)
-    node.layout.x = e.left
-    node.layout.y = e.top
+    applyChange(node, 'layout', {
+      ...node.layout,
+      x: e.left,
+      y: e.top,
+    })
   }
 
   function getNodeByTarget(element: HTMLElement) {
@@ -22,8 +49,11 @@ export function useMoveable() {
     e.target.style.width = e.width + 'px'
     e.target.style.height = e.height + 'px'
     const node = getNodeByTarget(e.target as HTMLElement)
-    node.layout.width = e.width
-    node.layout.height = e.height
+    applyChange(node, 'layout', {
+      ...node.layout,
+      width: e.width,
+      height: e.height,
+    })
     // 发现拖动时拖动左边会往右扩大。原因是往左拖动时宽度变了x轴没变，所以要手动更新下x轴和y轴
     onDrag(e.drag)
   }
@@ -42,5 +72,7 @@ export function useMoveable() {
     onDragGroup,
     onResize,
     onResizeGroup,
+    onStart,
+    onEnd,
   }
 }
