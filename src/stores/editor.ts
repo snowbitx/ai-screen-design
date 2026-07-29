@@ -98,6 +98,11 @@ export const useEditorStore = defineStore('editor', () => {
   function toggleLock(node: MaterialSchema) {
     applyChange(node, 'locked', !node.locked)
   }
+
+  function updateNode(id, newNode) {
+    const newNodes = nodes.value.map((node) => (node.id === id ? newNode : node))
+    setNodes(newNodes)
+  }
   return {
     panelVisible,
     nodes,
@@ -116,5 +121,6 @@ export const useEditorStore = defineStore('editor', () => {
     moveTop,
     moveBottom,
     toggleLock,
+    updateNode,
   }
 })

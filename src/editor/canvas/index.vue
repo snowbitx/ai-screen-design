@@ -177,6 +177,10 @@ function onCommand(command: string) {
 
 <style scoped lang="scss">
 .canvas-root {
+  position: relative;
+  overflow: hidden;
+  //创建新的层级上下文 只在当前canvas-root下生效
+  isolation: isolate;
   .canvas-stage {
     position: relative;
     .canvas-node {

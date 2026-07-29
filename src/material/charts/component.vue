@@ -7,7 +7,7 @@ defineOptions({
 
 const props = defineProps<{ schema: MaterialSchema }>()
 
-const chartRef = useTemplateRef('chart')
+const chartRef = useTemplateRef('chartRef')
 let chart: EChartsType
 watch(
   () => props.schema.props.option,
@@ -35,7 +35,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="chart-material w-full h-full" ref="chart">图标</div>
+  <div class="chart-material w-full h-full" ref="chartRef">图标</div>
 </template>
 
 <style scoped lang="scss"></style>
