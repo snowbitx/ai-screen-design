@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.2",
+    "echarts": "^6.1.0",
     "element-plus": "^2.14.2",
     "pinia": "^3.0.4",
     "tailwindcss": "^4.3.2",

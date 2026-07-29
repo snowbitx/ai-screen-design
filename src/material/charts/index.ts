@@ -1,26 +1,14 @@
-import type { MaterialDefinition } from '@/schema/material.ts'
+import ChartMaterial from './component.vue'
+import { barMaterial } from './bar.ts'
+import { areaMaterial } from './area.ts'
+import { lineMaterial } from './line.ts'
+import { pieMaterial } from './pie.ts'
 
-const barMaterial: MaterialDefinition = {
-  name: '柱状图',
-  group: 'charts',
-  icon: 'fluent-color:list-bar-16',
-  setters: [],
-  schema: {
-    type: 'charts',
-    name: '柱状图',
-    layout: {
-      x: 0,
-      y: 0,
-      width: 300,
-      height: 50,
-    },
-    style: {},
-    props: {
-      options: {},
-    },
-  },
-}
+const chartsMaterial = [barMaterial, areaMaterial, lineMaterial, pieMaterial]
 
-export function install(regisiter) {
-  regisiter(barMaterial)
+export function install(register) {
+  chartsMaterial.forEach((material) => {
+    // 遍历所有的图表物料，全部注册
+    register(material, ChartMaterial)
+  })
 }

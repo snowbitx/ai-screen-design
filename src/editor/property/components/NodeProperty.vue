@@ -12,7 +12,9 @@ defineOptions({
 const editorStore = useEditorStore()
 const { selectedNode } = storeToRefs(editorStore)
 console.log('selectedNode ==> ', selectedNode)
-const setters = getMaterialSetters(selectedNode.value.type)
+const setters = computed(() => {
+  return getMaterialSetters(selectedNode.value.type)
+})
 console.log('setters ==> ', setters)
 
 const layoutSetters = [
