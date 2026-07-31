@@ -29,6 +29,10 @@ export const useEditorStore = defineStore('editor', () => {
   // 当前编辑器组件列表
   const nodes = toRef(page.value, 'nodes')
   const canvas = toRef(page.value, 'canvas')
+
+  function setPage(newPage: PageSchema) {
+    Object.assign(page.value, newPage)
+  }
   // 当前选中节点的id
   const selectedNodeIds = ref([])
   // 支持多选后，拿多选的结构来维护，这样可以共用清除选中
@@ -122,5 +126,6 @@ export const useEditorStore = defineStore('editor', () => {
     moveBottom,
     toggleLock,
     updateNode,
+    setPage,
   }
 })
