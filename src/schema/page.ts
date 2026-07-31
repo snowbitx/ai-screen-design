@@ -10,4 +10,15 @@ interface CanvasSchema {
 export interface PageSchema {
   canvas: CanvasSchema
   nodes: MaterialSchema[]
+  dataSources: DataSourceSchema[]
+}
+
+export interface DataSourceSchema {
+  /**
+   * 数据源类型 静态类型/接口请求
+   */
+  type: 'static' | 'api'
+  id: string
+  name: string
+  data: any
 }

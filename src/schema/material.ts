@@ -13,6 +13,8 @@ export interface MaterialSchema {
   layout: Layout
   style: Record<string, any>
   props: Record<string, any>
+  // 数据源Id
+  dataId?: string
 }
 
 interface SetterSchema {

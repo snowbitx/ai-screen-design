@@ -1,6 +1,6 @@
 import type { OnDrag, OnDragGroup, OnResize, OnResizeGroup } from 'vue3-moveable'
 import { useEditorStore } from '@/stores/editor.ts'
-import { useUndoRedo } from '@/editor/useUndoRedo.ts'
+import { useUndoRedo } from '@/composables/useUndoRedo.ts'
 
 export function useMoveable(moveableRef) {
   const { applyChange, startBatch, commitBatch } = useUndoRedo()

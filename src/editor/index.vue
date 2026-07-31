@@ -6,6 +6,7 @@ import MaterialPanel from '@/editor/panels/material/index.vue'
 import LayerPanel from '@/editor/panels/layer/index.vue'
 import CanvasRoot from '@/editor/canvas/index.vue'
 import PropertyPanel from '@/editor/property/index.vue'
+import { storeToRefs } from 'pinia'
 
 defineOptions({
   name: 'ScreenEditor',
@@ -13,6 +14,11 @@ defineOptions({
 
 const { panelVisible } = useEditorStore()
 
+const editorStore = useEditorStore()
+const { dataSources } = storeToRefs(editorStore)
+
+// 此处是为了区分编辑器渲染时的状态，将数据源注入给后代组件以便 运行时使用 不直接取editorStore数据
+provide('dataSources', dataSources)
 const materialWidth = computed(() => (panelVisible.material ? '260px' : 0))
 const layerWidth = computed(() => (panelVisible.layer ? '160px' : 0))
 const propertyWidth = computed(() => (panelVisible.property ? '360px' : 0))

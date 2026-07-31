@@ -4,6 +4,7 @@ import { storeToRefs } from 'pinia'
 import { getMaterialSetters } from '@/material'
 import FormCreate from '@/editor/property/components/FormCreate.vue'
 import MonacoEditor from '@/components/MonacoEditor/index.vue'
+import DataSource from '@/editor/property/components/DataSource.vue'
 
 defineOptions({
   name: 'NodeProperty',
@@ -44,8 +45,8 @@ const layoutSetters = [
     span: 12,
   },
 ]
+const activeTab = ref('property')
 const active = ref('node')
-
 const jsonVisible = ref(false)
 const jsonText = ref('')
 function previewJson() {
@@ -81,16 +82,22 @@ function onConfirm() {
         </span>
       </div>
     </div>
-    <el-collapse v-model="active" accordion>
-      <el-collapse-item title="布局属性" name="layout">
-        <FormCreate :setters="layoutSetters" :formData="selectedNode" />
-      </el-collapse-item>
-      <el-collapse-item title="组件属性" name="node">
-        <FormCreate :setters="setters" :formData="selectedNode" />
-      </el-collapse-item>
-    </el-collapse>
+    <el-tabs v-model="activeTab" stretch>
+      <el-tab-pane label="属性" name="property">
+        <el-collapse v-model="active" accordion>
+          <el-collapse-item title="布局属性" name="layout">
+            <form-create :setters="layoutSetters" :formData="selectedNode"></form-create>
+          </el-collapse-item>
+          <el-collapse-item title="组件属性" name="node">
+            <form-create :setters="setters" :formData="selectedNode"></form-create>
+          </el-collapse-item>
+        </el-collapse>
+      </el-tab-pane>
+      <el-tab-pane label="数据源" name="data-source">
+        <DataSource />
+      </el-tab-pane>
+    </el-tabs>
 
-    !-- 预览 json -->
     <el-drawer :destroy-on-close="true" v-model="jsonVisible" title="编辑 JSON" size="800">
       <MonacoEditor v-model="jsonText" />
 

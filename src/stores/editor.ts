@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import type { MaterialSchema } from '@/schema/material.ts'
 import type { PageSchema } from '@/schema/page.ts'
-import { useUndoRedo } from '@/editor/useUndoRedo.ts'
+import { useUndoRedo } from '@/composables/useUndoRedo.ts'
 
 export const useEditorStore = defineStore('editor', () => {
   const { applyChange } = useUndoRedo()
@@ -20,6 +20,46 @@ export const useEditorStore = defineStore('editor', () => {
     },
     // 和下面的nodes是同一个东西，用page 是聚合dsl数据。
     nodes: [],
+    dataSources: [
+      {
+        type: 'static',
+        id: '123',
+        name: '销售数据',
+        data: [
+          {
+            label: '一月',
+            value: 100,
+          },
+          {
+            label: '二月',
+            value: 200,
+          },
+          {
+            label: '三月',
+            value: 300,
+          },
+        ],
+      },
+      {
+        type: 'static',
+        id: '456',
+        name: '访问数据',
+        data: [
+          {
+            label: '一月',
+            value: 1000,
+          },
+          {
+            label: '二月',
+            value: 800,
+          },
+          {
+            label: '三月',
+            value: 1100,
+          },
+        ],
+      },
+    ],
   })
 
   /**
@@ -29,6 +69,7 @@ export const useEditorStore = defineStore('editor', () => {
   // 当前编辑器组件列表
   const nodes = toRef(page.value, 'nodes')
   const canvas = toRef(page.value, 'canvas')
+  const dataSources = toRef(page.value, 'dataSources')
 
   function setPage(newPage: PageSchema) {
     Object.assign(page.value, newPage)
@@ -112,6 +153,7 @@ export const useEditorStore = defineStore('editor', () => {
     nodes,
     page,
     canvas,
+    dataSources,
     selectedNode,
     selectNode,
     addNode,

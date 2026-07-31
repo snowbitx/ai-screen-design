@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
 import { useEditorStore } from '@/stores/editor.ts'
-import { useUndoRedo } from '@/editor/useUndoRedo.ts'
+import { useUndoRedo } from '@/composables/useUndoRedo.ts'
 
 defineOptions({
   name: 'ToolbarLeft',

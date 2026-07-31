@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { getValue } from '@/utils'
 import { ElColorPicker, ElInput, ElInputNumber, ElCheckbox, ElSelect } from 'element-plus'
-import { useUndoRedo } from '@/editor/useUndoRedo.ts'
+import { useUndoRedo } from '@/composables/useUndoRedo.ts'
 defineProps(['setters', 'formData'])
 defineOptions({
   name: 'FormCreate',
