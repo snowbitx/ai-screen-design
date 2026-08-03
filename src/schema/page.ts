@@ -21,4 +21,10 @@ export interface DataSourceSchema {
   id: string
   name: string
   data: any
+  // 接口请求的 api 数据源需要url
+  url?: string
+  // 接口轮询
+  interval?: number
+  // 预设参数
+  params: Record<string, any>
 }

@@ -31,13 +31,11 @@ const option = computed(() => {
 })
 
 watch(
-  () => option,
-  () => {
-    chart.setOption(option.value)
+  option,
+  (newValue) => {
+    chart.setOption(newValue)
   },
-  {
-    deep: true,
-  },
+  { deep: true },
 )
 
 onMounted(() => {
