@@ -27,4 +27,6 @@ export interface DataSourceSchema {
   interval?: number
   // 预设参数
   params: Record<string, any>
+  method?: 'get' | 'post'
+  responsePath?: string
 }

@@ -3,6 +3,7 @@ import { useEditorStore } from '@/stores/editor.ts'
 import { storeToRefs } from 'pinia'
 import MonacoEditor from '@/components/MonacoEditor/index.vue'
 import { deepClone } from '@/utils'
+import { fetchData } from '@/composables/useDataSource.ts'
 
 defineOptions({
   name: 'DatasourceManager',
@@ -10,7 +11,6 @@ defineOptions({
 
 const editorStore = useEditorStore()
 const { dataSources } = storeToRefs(editorStore)
-
 /**
  * 深拷贝数据,params和data需要转为字符串
  */
@@ -23,6 +23,7 @@ const data = ref(
     }
   }),
 )
+const responseText = ref()
 const activeSource = ref()
 function selectDataSource(source) {
   activeSource.value = source
@@ -46,17 +47,25 @@ function removeDataSource(id: string) {
   selectDataSource(null)
 }
 
+function onRequest() {
+  fetchData({
+    ...activeSource.value,
+    params: activeSource.value.params ? JSON.parse(activeSource.value.params) : undefined,
+  }).then((res) => {
+    responseText.value = JSON.stringify(res, null, 2)
+  })
+}
+
 defineExpose({
   save() {
-    const _data = deepClone(data.value).map((item) => {
+    // 更新页面数据源
+    editorStore.page.dataSources = deepClone(data.value).map((item) => {
       return {
         ...item,
         data: item.data ? JSON.parse(item.data) : undefined,
         params: item.params ? JSON.parse(item.params) : undefined,
       }
     })
-    // 更新页面数据源
-    editorStore.page.dataSources = _data
   },
 })
 </script>
@@ -96,11 +105,26 @@ defineExpose({
           <el-form-item label="请求地址">
             <el-input v-model="activeSource.url"></el-input>
           </el-form-item>
+          <el-form-item label="请求方法">
+            <el-radio-group v-model="activeSource.method">
+              <el-radio-button label="GET" value="get"></el-radio-button>
+              <el-radio-button label="POST" value="post"></el-radio-button>
+            </el-radio-group>
+          </el-form-item>
           <el-form-item label="轮训周期">
             <el-input v-model="activeSource.interval"></el-input>
           </el-form-item>
           <el-form-item label="参数">
             <monaco-editor v-model="activeSource.params"></monaco-editor>
+          </el-form-item>
+          <el-form-item label="响应路径">
+            <el-input v-model="activeSource.responsePath"></el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" @click="onRequest">请求预览</el-button>
+          </el-form-item>
+          <el-form-item label="预览数据">
+            <MonacoEditor v-model="responseText"></MonacoEditor>
           </el-form-item>
         </div>
       </el-form>

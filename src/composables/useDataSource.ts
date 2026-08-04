@@ -1,5 +1,6 @@
 import type { DataSourceSchema } from '@/schema/page.ts'
 import axios from 'axios'
+import { getValue } from '@/utils'
 
 export function useDataSource(dataId: Ref<string>) {
   const dataSources = inject<Ref<DataSourceSchema[]>>('dataSources')
@@ -42,4 +43,21 @@ export function useDataSource(dataId: Ref<string>) {
   return {
     data,
   }
+}
+
+export async function fetchData(source: DataSourceSchema) {
+  const search = new URLSearchParams()
+  const params = Object.fromEntries(search.entries())
+  const url = source.url
+  const queryParms = {
+    ...params,
+    ...source.params,
+  }
+  const paramsKey = source.method === 'get' ? 'params' : 'data'
+  const res = await axios.request({
+    url,
+    method: source.method || 'GET',
+    [paramsKey]: queryParms,
+  })
+  return getValue(res.data, source.responsePath)
 }

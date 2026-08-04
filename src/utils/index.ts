@@ -10,6 +10,7 @@ export function debounce(fn, ms) {
 
 export function getValue(target, key) {
   // key 'props.content'
+  if (!key) return target
   const keys = key.split('.')
   while (keys.length) {
     target = target[keys.shift()]
