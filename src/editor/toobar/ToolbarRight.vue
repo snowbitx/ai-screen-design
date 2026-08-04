@@ -4,6 +4,7 @@ import MonacoEditor from '@/components/MonacoEditor/index.vue'
 import { useEditorStore } from '@/stores/editor.ts'
 import { storeToRefs } from 'pinia'
 import { ElMessage } from 'element-plus'
+import DatasourceManager from '@/editor/toobar/components/DatasourceManager.vue'
 
 defineOptions({
   name: 'ToolbarRight',
@@ -11,6 +12,9 @@ defineOptions({
 const editorStore = useEditorStore()
 const { page } = storeToRefs(editorStore)
 const visible = ref(false)
+const dataSourceVisible = ref(false)
+const dataSourceManagerRef = useTemplateRef('dataSourceManagerRef')
+
 const jsonText = ref('')
 
 function previewJson() {
@@ -53,6 +57,16 @@ async function onFileChange(e) {
 function onImport() {
   inputRef.value.click()
 }
+
+function openDataSource() {
+  dataSourceVisible.value = true
+}
+
+function onSave() {
+  // 调用 DataSourceManager 中暴漏的方法
+  dataSourceManagerRef.value.save()
+  dataSourceVisible.value = false
+}
 </script>
 
 <template>
@@ -65,6 +79,9 @@ function onImport() {
     </span>
     <span>
       <Icon icon="fluent-mdl2:web-publish"></Icon>
+    </span>
+    <span @click="openDataSource">
+      <Icon icon="mdi:database"></Icon>
     </span>
     <span @click="onImport">
       <icon icon="mdi:import"></icon>
@@ -80,6 +97,14 @@ function onImport() {
         <el-button type="primary" @click="onConfirm">确认</el-button>
       </template>
     </el-drawer>
+    <el-dialog destroy-on-close title="数据源配置" v-model="dataSourceVisible" width="800">
+      <!--   数据源管理   -->
+      <DatasourceManager ref="dataSourceManagerRef"></DatasourceManager>
+      <template #footer>
+        <el-button @click="dataSourceVisible = false">取消</el-button>
+        <el-button @click="onSave" type="primary">确认</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
