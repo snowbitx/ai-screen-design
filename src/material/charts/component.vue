@@ -17,7 +17,7 @@ let chart: EChartsType
  * 运行时的状态（渲染时）
  */
 const dataId = computed(() => props.schema.dataId)
-const { data } = useDataSource(dataId)
+const { data, loading, error } = useDataSource(dataId)
 
 const option = computed(() => {
   const _option = props.schema.props.option
@@ -54,7 +54,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="chart-material w-full h-full" ref="chartRef">图标</div>
+  <div v-if="error">
+    {{ error }}
+  </div>
+  <div v-else v-loading="loading" class="chart-material w-full h-full" ref="chartRef">图标</div>
 </template>
 
 <style scoped lang="scss"></style>
