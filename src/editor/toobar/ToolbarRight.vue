@@ -5,10 +5,13 @@ import { useEditorStore } from '@/stores/editor.ts'
 import { storeToRefs } from 'pinia'
 import { ElMessage } from 'element-plus'
 import DatasourceManager from '@/editor/toobar/components/DatasourceManager.vue'
+import { useRouter } from 'vue-router'
 
 defineOptions({
   name: 'ToolbarRight',
 })
+
+const router = useRouter()
 const editorStore = useEditorStore()
 const { page } = storeToRefs(editorStore)
 const visible = ref(false)
@@ -67,11 +70,15 @@ function onSave() {
   dataSourceManagerRef.value.save()
   dataSourceVisible.value = false
 }
+
+function onPreview() {
+  router.push('/preview')
+}
 </script>
 
 <template>
   <div class="flex gap-20 toolbar-right justify-end">
-    <span>
+    <span @click="onPreview">
       <Icon icon="material-symbols:preview"></Icon>
     </span>
     <span @click="previewJson">

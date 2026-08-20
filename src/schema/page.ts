@@ -26,7 +26,7 @@ export interface DataSourceSchema {
   // 接口轮询
   interval?: number
   // 预设参数
-  params: Record<string, any>
+  params?: Record<string, any>
   method?: 'get' | 'post'
   responsePath?: string
 }

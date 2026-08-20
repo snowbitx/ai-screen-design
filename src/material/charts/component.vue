@@ -12,7 +12,7 @@ const chartRef = useTemplateRef('chartRef')
 let chart: EChartsType
 
 /**
- * 物料状态来源：
+ * 物料状态来源：编辑器编辑时的相关状态放在editorStore 渲染器在用时就不能在里面取了。所以此处 从editor/index provide注入一个DataSource
  * 编辑时的状态（编辑器在用的时候）
  * 运行时的状态（渲染时）
  */
