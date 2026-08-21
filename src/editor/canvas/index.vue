@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { createNode, getMaterialComponent } from '@/material'
+import { createNode, getMaterialComponent } from '@/materials'
 import type { CSSProperties } from 'vue'
 import Selecto from 'vue3-selecto'
 import Moveable from 'vue3-moveable'
@@ -42,7 +42,8 @@ const { selectedTarget, onSelectEnd, onSelect, onClearSelected } = useSelection(
 })
 
 function onDrop(e: DragEvent) {
-  const data = e.dataTransfer.getData('scheme')
+  const data = e.dataTransfer?.getData('schema')
+  if (!data) return
   const node = createNode(JSON.parse(data))
   // 拖过来时更新坐标
   node.layout.x = e.offsetX - node.layout.width / 2

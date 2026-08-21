@@ -11,6 +11,7 @@ export interface PageSchema {
   canvas: CanvasSchema
   nodes: MaterialSchema[]
   dataSources: DataSourceSchema[]
+  id?: string
 }
 
 export interface DataSourceSchema {

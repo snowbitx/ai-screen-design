@@ -7,7 +7,7 @@ defineProps(['schema'])
 </script>
 
 <template>
-  <div :style="schema.style">
+  <div :style="schema.style || {}">
     {{ schema.props.content }}
   </div>
 </template>

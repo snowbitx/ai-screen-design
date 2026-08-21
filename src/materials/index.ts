@@ -28,7 +28,7 @@ export const groups = [
   },
   {
     name: '信息',
-    icon: 'material-symbols:info',
+    icon: 'materials-symbols:info',
     key: 'info',
   },
 ]

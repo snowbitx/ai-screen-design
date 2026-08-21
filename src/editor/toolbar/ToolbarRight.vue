@@ -4,8 +4,9 @@ import MonacoEditor from '@/components/MonacoEditor/index.vue'
 import { useEditorStore } from '@/stores/editor.ts'
 import { storeToRefs } from 'pinia'
 import { ElMessage } from 'element-plus'
-import DatasourceManager from '@/editor/toobar/components/DatasourceManager.vue'
+import DatasourceManager from '@/editor/toolbar/components/DatasourceManager.vue'
 import { useRouter } from 'vue-router'
+import { publishPage } from '@/utils/publish.ts'
 
 defineOptions({
   name: 'ToolbarRight',
@@ -74,6 +75,11 @@ function onSave() {
 function onPreview() {
   router.push('/preview')
 }
+
+function onPublish() {
+  const id = publishPage(page.value)
+  router.push(`/screen?id=${id}`)
+}
 </script>
 
 <template>
@@ -84,7 +90,7 @@ function onPreview() {
     <span @click="previewJson">
       <Icon icon="codicon:json"> </Icon>
     </span>
-    <span>
+    <span @click="onPublish">
       <Icon icon="fluent-mdl2:web-publish"></Icon>
     </span>
     <span @click="openDataSource">

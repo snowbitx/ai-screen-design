@@ -154,7 +154,7 @@ export interface PageSchema {
 `MaterialSchema` 表示画布中的一个运行时节点。
 
 ```ts
-// src/schema/material.ts
+// src/schema/materials.ts
 interface Layout {
   x: number
   y: number
@@ -255,7 +255,7 @@ const selectedNode = computed(() => {
 物料系统采用注册表模式。注册中心维护三个索引：
 
 ```ts
-// src/material/index.ts
+// src/materials/index.ts
 const materials: MaterialDefinition[] = []
 const componentMap = new Map()
 const settersMap = new Map()
@@ -295,7 +295,7 @@ Object.values(materialModules).forEach((materialModule) => {
 文本物料的注册入口如下：
 
 ```ts
-// src/material/text/index.ts
+// src/materials/text/index.ts
 export function install(register) {
   register(textMaterial, TextMaterial)
 }
@@ -590,12 +590,12 @@ src/material/image/
 
 ```ts
 import ImageMaterial from './component.vue'
-import type { MaterialDefinition } from '@/schema/material'
+import type { MaterialDefinition } from '@/schema/materials'
 
 const imageMaterial: MaterialDefinition = {
   name: '图片',
   group: 'info',
-  icon: 'material-symbols:image',
+  icon: 'materials-symbols:image',
   setters: [
     {
       type: 'input',

@@ -11,7 +11,7 @@ export interface MaterialSchema {
   id: string
   locked?: boolean
   layout: Layout
-  style: Record<string, any>
+  style?: Record<string, any>
   props: Record<string, any>
   // 数据源Id
   dataId?: string

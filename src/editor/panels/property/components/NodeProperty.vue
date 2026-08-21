@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { useEditorStore } from '@/stores/editor.ts'
 import { storeToRefs } from 'pinia'
-import { getMaterialSetters } from '@/material'
-import FormCreate from '@/editor/property/components/FormCreate.vue'
+import { getMaterialSetters } from '@/materials'
+import FormCreate from '@/editor/panels/property/components/FormCreate.vue'
 import MonacoEditor from '@/components/MonacoEditor/index.vue'
-import DataSource from '@/editor/property/components/DataSource.vue'
+import DataSource from '@/editor/panels/property/components/DataSource.vue'
 
 defineOptions({
   name: 'NodeProperty',
