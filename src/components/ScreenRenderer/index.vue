@@ -2,16 +2,18 @@
 import type { MaterialSchema } from '@/schema/material.ts'
 import { getMaterialComponent } from '@/materials'
 import type { PageSchema } from '@/schema/page.ts'
+import { createRuntimeContext } from '@/runtime/context.ts'
 
 defineOptions({
   name: 'ScreenRenderer',
 })
 
 const props = defineProps<{ page: PageSchema }>()
-
-const canvas = computed(() => props.page.canvas)
-const dataSources = computed(() => props.page.dataSources)
-const nodes = computed(() => props.page.nodes)
+const runtimePage = ref(props.page)
+const context = createRuntimeContext(runtimePage)
+const canvas = computed(() => runtimePage.value.canvas)
+const dataSources = computed(() => runtimePage.value.dataSources)
+const nodes = computed(() => runtimePage.value.nodes)
 
 const scale = ref(1)
 const left = ref(0)
@@ -50,7 +52,19 @@ function init() {
   top.value = (window.innerHeight - canvas.value.height * scale.value) / 2
 }
 
+// 将物料组件实例注册到context上
+function registerNodeInstance() {
+  const refs = {}
+  for (const key in refs) {
+    // 取第0个是因为ref可能重复所以是数组
+    refs[key] = vm[key][0]
+  }
+  context.registerNodeInstance(refs)
+}
+
+const vm = getCurrentInstance()
 onMounted(() => {
+  registerNodeInstance()
   init()
   addEventListener('resize', init)
   onBeforeUnmount(() => {
@@ -68,7 +82,7 @@ onMounted(() => {
         :key="node.id"
         :style="getNodeStyle(node, index)"
       >
-        <component :is="getMaterialComponent(node.type)" :schema="node"></component>
+        <component :ref="node.id" :is="getMaterialComponent(node.type)" :schema="node"></component>
       </div>
     </div>
   </div>

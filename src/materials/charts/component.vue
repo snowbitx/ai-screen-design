@@ -17,7 +17,7 @@ let chart: EChartsType
  * 运行时的状态（渲染时）
  */
 const dataId = computed(() => props.schema.dataId)
-const { data, loading, error } = useDataSource(dataId)
+const { data, loading, error, refresh } = useDataSource(dataId)
 
 const option = computed(() => {
   const _option = props.schema.props.option
@@ -50,6 +50,10 @@ onMounted(() => {
     ob.disconnect()
     chart.dispose()
   })
+})
+
+defineExpose({
+  refresh,
 })
 </script>
 

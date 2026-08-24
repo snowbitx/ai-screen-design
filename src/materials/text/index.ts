@@ -18,6 +18,11 @@ const textMaterial: MaterialDefinition = {
       label: '颜色',
       key: 'style.color',
     },
+    {
+      type: 'number',
+      label: '字号',
+      key: 'style.fontSize',
+    },
   ],
   // DSL设计
   schema: {
@@ -31,6 +36,7 @@ const textMaterial: MaterialDefinition = {
     },
     style: {
       color: '#ff0',
+      fontSize: 20,
     },
     props: {
       content: 'hello world',
