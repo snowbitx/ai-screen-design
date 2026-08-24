@@ -41,6 +41,13 @@ const textMaterial: MaterialDefinition = {
     props: {
       content: 'hello world',
     },
+    events: [
+      {
+        type: 'click',
+        name: 'fn',
+        code: 'console.log(123)',
+      },
+    ],
   },
 }
 

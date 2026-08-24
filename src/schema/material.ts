@@ -5,6 +5,14 @@ interface Layout {
   height: number
 }
 
+interface MaterialEvent {
+  // 事件类型
+  type: string
+  // 事件名
+  name: string
+  // 函数体
+  code: string
+}
 export interface MaterialSchema {
   type: string
   name: string
@@ -15,6 +23,7 @@ export interface MaterialSchema {
   props: Record<string, any>
   // 数据源Id
   dataId?: string
+  events?: MaterialEvent[]
 }
 
 interface SetterSchema {
