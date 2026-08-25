@@ -78,8 +78,8 @@ function createEvents(node: MaterialSchema) {
   events.forEach((event) => {
     // {
     //   type: 'click',
-    //     name: 'fn',
-    // 运行时希望点击时拿到context和node节点，$是防重名
+    //   name: 'fn',
+    //   运行时希望点击时拿到context和node节点，$是防重名
     //   code: 'console.log($context,$node,123)',
     // },
     listeners[event.type] = () => {

@@ -5,6 +5,7 @@ import { getMaterialSetters } from '@/materials'
 import FormCreate from '@/editor/panels/property/components/FormCreate.vue'
 import MonacoEditor from '@/components/MonacoEditor/index.vue'
 import DataSource from '@/editor/panels/property/components/DataSource.vue'
+import NodeEvents from '@/editor/panels/components/NodeEvents.vue'
 
 defineOptions({
   name: 'NodeProperty',
@@ -48,6 +49,7 @@ const layoutSetters = [
 const activeTab = ref('property')
 const active = ref('node')
 const jsonVisible = ref(false)
+const eventVisible = ref(false)
 const jsonText = ref('')
 function previewJson() {
   jsonText.value = JSON.stringify(selectedNode.value, null, 2)
@@ -67,6 +69,12 @@ function onConfirm() {
   // 关掉抽屉
   jsonVisible.value = false
 }
+
+const nodeEventsRef = useTemplateRef('nodeEventsRef')
+function onConfirmEvent() {
+  nodeEventsRef.value.save()
+  eventVisible.value = false
+}
 </script>
 
 <template>
@@ -74,9 +82,9 @@ function onConfirm() {
     <div class="node-title">
       <span>{{ selectedNode.name }}</span>
       <div class="flex gap-20">
-        <!--        <span class="cursor-pointer" @click="eventVisible = true">-->
-        <!--          <Icon icon="codicon:symbol-event"></Icon>-->
-        <!--        </span>-->
+        <span class="cursor-pointer" @click="eventVisible = true">
+          <Icon icon="codicon:symbol-event"></Icon>
+        </span>
         <span class="cursor-pointer" @click="previewJson">
           <Icon icon="si:json-duotone"></Icon>
         </span>
@@ -97,15 +105,22 @@ function onConfirm() {
         <DataSource />
       </el-tab-pane>
     </el-tabs>
-
+    <!--预览json-->
     <el-drawer :destroy-on-close="true" v-model="jsonVisible" title="编辑 JSON" size="800">
       <MonacoEditor v-model="jsonText" />
-
       <template #footer>
         <el-button @click="jsonVisible = false">取消</el-button>
         <el-button type="primary" @click="onConfirm">确认</el-button>
       </template>
     </el-drawer>
+    <!--事件配置-->
+    <el-dialog v-model="eventVisible" width="800" title="事件配置">
+      <NodeEvents ref="nodeEventsRef"></NodeEvents>
+      <template #footer>
+        <el-button @click="eventVisible = false">取消</el-button>
+        <el-button type="primary" @click="onConfirmEvent">确认</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 

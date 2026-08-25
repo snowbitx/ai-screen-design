@@ -5,7 +5,7 @@ interface Layout {
   height: number
 }
 
-interface MaterialEvent {
+export interface MaterialEvent {
   // 事件类型
   type: string
   // 事件名
