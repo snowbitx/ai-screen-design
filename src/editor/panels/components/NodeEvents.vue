@@ -26,6 +26,7 @@ function selectEvent(event: MaterialEvent) {
 function onAdd() {
   // 新增数据源
   data.value.push({
+    title: '',
     name: '未命名',
     type: '',
     code: '',
@@ -60,13 +61,16 @@ defineExpose({
         :key="item.name"
         @click="selectEvent(item)"
       >
-        <span>{{ item.name }}</span>
+        <span>{{ item.title }}</span>
         <!--        事件冒泡了 不加stop会自动选中-->
         <span @click.stop="removeEvent(item.name)"> <Icon icon="mdi:remove"></Icon></span>
       </div>
     </div>
     <div class="node-event-content">
       <el-form v-if="activeEvent">
+        <el-form-item label="标题">
+          <el-input v-model="activeEvent.title"></el-input>
+        </el-form-item>
         <el-form-item label="名称">
           <el-input v-model="activeEvent.name"></el-input>
         </el-form-item>
@@ -75,7 +79,7 @@ defineExpose({
         </el-form-item>
         <el-form-item label="函数体">
           <div class="flex w-full flex-col bg-[#1e1e1e]">
-            <div class="flex-none pl-30">function ($context,$node)</div>
+            <div class="flex-none pl-30">function{{ activeEvent.name }} ($context,$node)</div>
             <monaco-editor
               class="flex-1"
               v-model="activeEvent.code"

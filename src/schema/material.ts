@@ -12,6 +12,10 @@ export interface MaterialEvent {
   name: string
   // 函数体
   code: string
+  // 最终根据code生成的函数 保存起来用来跨物料触发
+  handler?: (...args: any) => void
+  // 事件标题
+  title: string
 }
 export interface MaterialSchema {
   type: string

@@ -14,6 +14,8 @@ interface RuntimeContext {
   trigger(id: string, name: string, ...args: any[]): void
   // 通过dataId刷新所有组件中的数据
   refreshNodesByDataId(dataId: string): void
+  // 跨组件触发事件
+  dispatch(id: string, name: string, payload?: any[]): void
 }
 
 export function createRuntimeContext(page: Ref<PageSchema>): RuntimeContext {
@@ -61,6 +63,18 @@ export function createRuntimeContext(page: Ref<PageSchema>): RuntimeContext {
       trigger(node.id, 'refresh')
     })
   }
+
+  const dispatch: RuntimeContext['dispatch'] = (id, name, payload): void => {
+    const node = getNode(id)
+    if (!node) {
+      console.warn(`Cannot set attribute ${id} in runtime context`)
+      return
+    }
+    const event = node.events?.find((event) => event.name === name)
+    if (event) {
+      event.handler?.(payload)
+    }
+  }
   return {
     getNode,
     setAttribute,
@@ -69,5 +83,6 @@ export function createRuntimeContext(page: Ref<PageSchema>): RuntimeContext {
     registerNodeInstance,
     trigger,
     refreshNodesByDataId,
+    dispatch,
   }
 }

@@ -82,10 +82,14 @@ function createEvents(node: MaterialSchema) {
     //   运行时希望点击时拿到context和node节点，$是防重名
     //   code: 'console.log($context,$node,123)',
     // },
-    listeners[event.type] = () => {
+    if (event.handler) {
+      listeners[event.type] = event.handler
+      return
+    }
+    event.handler = listeners[event.type] = (payload) => {
       // 前面的都是形参，最后是函数体
-      const fn = new Function('$context', '$node', event.code)
-      fn(runTimecontext, node)
+      const fn = new Function('$context', '$node', '$payload', event.code)
+      fn(runTimecontext, node, payload)
     }
   })
   return listeners

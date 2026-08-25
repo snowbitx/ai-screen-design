@@ -46,6 +46,7 @@ const textMaterial: MaterialDefinition = {
         type: 'click',
         name: 'fn',
         code: 'console.log(123)',
+        title: '点击事件',
       },
     ],
   },
