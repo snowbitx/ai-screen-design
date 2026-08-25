@@ -4,6 +4,7 @@ import { storeToRefs } from 'pinia'
 import MonacoEditor from '@/components/MonacoEditor/index.vue'
 import { deepClone } from '@/utils'
 import type { MaterialEvent } from '@/schema/material.ts'
+import { ElMessage } from 'element-plus'
 
 /**
  * 从DataSource页面复制而来。事件配置和事件源配置结构相似
@@ -13,12 +14,24 @@ defineOptions({
 })
 
 const editorStore = useEditorStore()
-const { selectedNode } = storeToRefs(editorStore)
+const { selectedNode, nodes } = storeToRefs(editorStore)
 /**
  * 深拷贝事件列表
  */
 const data = ref(deepClone(selectedNode.value.events || []))
 const activeEvent = ref()
+const dispatchEvent = ref()
+const dispatchOptions = computed(() => {
+  return nodes.value.map((node) => ({
+    label: node.name,
+    value: node.id,
+    children: node.events?.map((event) => ({
+      label: event.title,
+      value: event.name,
+    })),
+  }))
+})
+
 function selectEvent(event: MaterialEvent) {
   activeEvent.value = event
 }
@@ -38,6 +51,20 @@ function onAdd() {
 function removeEvent(name: string) {
   data.value = data.value.filter((item) => item.name !== name)
   selectEvent(null)
+}
+
+async function copyNodeId(id: string) {
+  // https或者本地可用的api
+  await navigator.clipboard.writeText(id)
+  ElMessage.success('复制成功')
+}
+
+function insertDispatchCode(values: string[]) {
+  const [id, name] = values
+  activeEvent.value.code += `context.dispatch(‘${id}’,'${name}')`
+  nextTick(() => {
+    dispatchEvent.value = undefined
+  })
 }
 
 defineExpose({
@@ -68,6 +95,22 @@ defineExpose({
     </div>
     <div class="node-event-content">
       <el-form v-if="activeEvent">
+        <div class="flex gap-20 mb-20">
+          <el-select class="flex-1" placeholder="复制节点id" @change="copyNodeId">
+            <el-option
+              v-for="node in nodes"
+              :key="node.id"
+              :value="node.id"
+              :label="node.name"
+            ></el-option>
+          </el-select>
+          <el-cascader
+            class="flex-1"
+            v-model="dispatchEvent"
+            :options="dispatchOptions"
+            @change="insertDispatchCode"
+          ></el-cascader>
+        </div>
         <el-form-item label="标题">
           <el-input v-model="activeEvent.title"></el-input>
         </el-form-item>

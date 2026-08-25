@@ -17,11 +17,11 @@ defineOptions({
 const route = useRoute()
 
 const editorStore = useEditorStore()
-const pageId = typeof route.query.id === 'string' ? route.query.id : route.query.id?.[0]
+const pageId = route.query.id
 
 if (pageId) {
   // 如果 pageId 有，去查询数据库（localStorage）
-  const page = getPublishedPage(pageId)
+  const page = getPublishedPage(pageId as string)
   editorStore.setPage(page)
 }
 
