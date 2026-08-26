@@ -5,6 +5,7 @@ import MonacoEditor from '@/components/MonacoEditor/index.vue'
 import { deepClone } from '@/utils'
 import type { MaterialEvent } from '@/schema/material.ts'
 import { ElMessage } from 'element-plus'
+import { getMaterialEventOptions } from '@/materials'
 
 /**
  * 从DataSource页面复制而来。事件配置和事件源配置结构相似
@@ -30,6 +31,11 @@ const dispatchOptions = computed(() => {
       value: event.name,
     })),
   }))
+})
+
+// 物件从物料里定义
+const eventOptions = computed(() => {
+  return getMaterialEventOptions(selectedNode.value.type)
 })
 
 function selectEvent(event: MaterialEvent) {
@@ -117,8 +123,15 @@ defineExpose({
         <el-form-item label="名称">
           <el-input v-model="activeEvent.name"></el-input>
         </el-form-item>
+        <!--        允许自定义事件-->
         <el-form-item label="类型">
-          <el-input v-model="activeEvent.type"></el-input>
+          <el-select
+            allow-create
+            filterable
+            v-model="activeEvent.type"
+            :options="eventOptions"
+            placeholder="请选择事件名"
+          ></el-select>
         </el-form-item>
         <el-form-item label="函数体">
           <div class="flex w-full flex-col bg-[#1e1e1e]">

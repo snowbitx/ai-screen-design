@@ -24,6 +24,24 @@ const textMaterial: MaterialDefinition = {
       key: 'style.fontSize',
     },
   ],
+  eventOptions: [
+    {
+      label: '点击事件',
+      value: 'click',
+    },
+    {
+      label: '双击事件',
+      value: 'dblclick',
+    },
+    {
+      label: '组件挂载',
+      value: 'vnodeMounted',
+    },
+    {
+      label: 'foo',
+      value: 'foo',
+    },
+  ],
   // DSL设计
   schema: {
     type: 'text',

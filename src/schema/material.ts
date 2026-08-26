@@ -37,11 +37,17 @@ interface SetterSchema {
   type: String
   [key: string]: any
 }
+
+interface EventOption {
+  label: string
+  value: string
+}
 export interface MaterialDefinition {
   name: string
   group: string
   icon: string
   setters: SetterSchema[]
+  eventOptions: EventOption[]
   // 初始化物料时不需要id，id只在运行时需要 会拖拽drop时存入
   schema: Omit<MaterialSchema, 'id'>
 }
