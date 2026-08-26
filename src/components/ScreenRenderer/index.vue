@@ -3,6 +3,7 @@ import type { MaterialSchema } from '@/schema/material.ts'
 import { getMaterialComponent } from '@/materials'
 import type { PageSchema } from '@/schema/page.ts'
 import { createRuntimeContext } from '@/runtime/context.ts'
+import { runSanBox } from '@/runtime/sanbox.ts'
 
 defineOptions({
   name: 'ScreenRenderer',
@@ -10,7 +11,7 @@ defineOptions({
 
 const props = defineProps<{ page: PageSchema }>()
 const runtimePage = ref(props.page)
-const runTimecontext = createRuntimeContext(runtimePage)
+const context = createRuntimeContext(runtimePage)
 const canvas = computed(() => runtimePage.value.canvas)
 const dataSources = computed(() => runtimePage.value.dataSources)
 const nodes = computed(() => runtimePage.value.nodes)
@@ -59,7 +60,7 @@ function registerNodeInstance() {
     // 取第0个是因为ref可能重复所以是数组
     refs[key] = vm[key][0]
   }
-  runTimecontext.registerNodeInstance(refs)
+  context.registerNodeInstance(refs)
 }
 
 const vm = getCurrentInstance()
@@ -87,9 +88,10 @@ function createEvents(node: MaterialSchema) {
       return
     }
     event.handler = listeners[event.type] = (payload) => {
+      runSanBox(event.code, { $context: context, $node: node, $payload: payload })
       // 前面的都是形参，最后是函数体
       const fn = new Function('$context', '$node', '$payload', event.code)
-      fn(runTimecontext, node, payload)
+      fn(context, node, payload)
     }
   })
   return listeners
