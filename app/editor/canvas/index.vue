@@ -180,10 +180,13 @@ function onCommand(command: string) {
 .canvas-root {
   position: relative;
   overflow: hidden;
+  // 画布工作区底色比编辑器面板深一档，衬托出画布边界
+  background: var(--muted);
   //创建新的层级上下文 只在当前canvas-root下生效
   isolation: isolate;
   .canvas-stage {
     position: relative;
+    box-shadow: 0 2px 16px color-mix(in srgb, var(--foreground) 12%, transparent);
     .canvas-node {
       position: absolute;
     }

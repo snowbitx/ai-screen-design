@@ -15,6 +15,7 @@ defineOptions({
 const router = useRouter()
 const editorStore = useEditorStore()
 const { page } = storeToRefs(editorStore)
+const { panelVisible } = editorStore
 const visible = ref(false)
 const dataSourceVisible = ref(false)
 const dataSourceManagerRef = useTemplateRef('dataSourceManagerRef')
@@ -88,6 +89,13 @@ async function onPublish() {
 
 <template>
   <div class="flex gap-20 toolbar-right justify-end">
+    <span
+      :class="{ active: panelVisible.ai }"
+      title="AI 助手"
+      @click="panelVisible.ai = !panelVisible.ai"
+    >
+      <Icon icon="mdi:robot-outline"></Icon>
+    </span>
     <span @click="onPreview">
       <Icon icon="material-symbols:preview"></Icon>
     </span>
@@ -141,6 +149,10 @@ async function onPublish() {
     &:hover {
       background: var(--accent);
       color: var(--accent-foreground);
+    }
+    &.active {
+      background: color-mix(in srgb, var(--primary) 14%, transparent);
+      color: var(--primary);
     }
   }
 }
