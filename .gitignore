@@ -37,3 +37,12 @@ __screenshots__/
 
 # Vite
 *.timestamp-*-*.mjs
+
+# Nuxt
+.nuxt
+.output
+.data
+.dist
+
+# ZCode plans (迁移方案等会话产物，不入库)
+.zcode/
