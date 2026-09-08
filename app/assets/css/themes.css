@@ -6,7 +6,7 @@
  * - element-plus 通过 --el-* 桥接段适配两套主题
  */
 
-:root {
+html:root {
   /* shadcn Neutral */
   --radius: 0.5rem;
   --background: oklch(1 0 0);
@@ -62,7 +62,7 @@
 }
 
 /* 原暗色主题：经典大屏编辑器配色 */
-:root.theme-classic {
+html:root.theme-classic {
   --background: #0d121b;
   --foreground: #e2e8f0;
   --card: #1b2436;
