@@ -2,9 +2,17 @@ import { defineStore } from 'pinia'
 import type { MaterialSchema } from '@shared/schema/material.ts'
 import type { PageSchema } from '@shared/schema/page.ts'
 import { useUndoRedo } from '@/composables/useUndoRedo.ts'
+import { useTheme } from '@/composables/useTheme.ts'
+
+// 两种主题对应的画布默认背景色
+const THEME_CANVAS_BG = {
+  light: '#f4f4f5',
+  dark: '#0d121b',
+}
 
 export const useEditorStore = defineStore('editor', () => {
   const { applyChange } = useUndoRedo()
+  const { isClassic } = useTheme()
 
   const panelVisible = reactive({
     material: true,
@@ -18,8 +26,8 @@ export const useEditorStore = defineStore('editor', () => {
     canvas: {
       width: 1920,
       height: 1080,
-      // 默认浅色画布，匹配 shadcn 主题（用户可随时在画布属性里改）
-      backgroundColor: '#f4f4f5',
+      // 新建页面时默认背景色跟随编辑器主题（用户可在画布属性里改）
+      backgroundColor: isClassic.value ? THEME_CANVAS_BG.dark : THEME_CANVAS_BG.light,
     },
     // 和下面的nodes是同一个东西，用page 是聚合dsl数据。
     nodes: [],
@@ -81,6 +89,14 @@ export const useEditorStore = defineStore('editor', () => {
   const nodes = toRef(page.value, 'nodes')
   const canvas = toRef(page.value, 'canvas')
   const dataSources = toRef(page.value, 'dataSources')
+
+  // 画布背景色还是主题默认值（用户没自定义过）时，切换主题立即跟随，无需刷新
+  watch(isClassic, (classic) => {
+    const target = classic ? THEME_CANVAS_BG.dark : THEME_CANVAS_BG.light
+    if (canvas.value.backgroundColor === THEME_CANVAS_BG.dark || canvas.value.backgroundColor === THEME_CANVAS_BG.light) {
+      applyChange(canvas.value, 'backgroundColor', target)
+    }
+  })
 
   function setPage(newPage: PageSchema) {
     Object.assign(page.value, newPage)
