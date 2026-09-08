@@ -1,4 +1,5 @@
 import type { MaterialDefinition } from '@shared/schema/material.ts'
+import { chartEventOptions } from './common.ts'
 
 export const areaMaterial: MaterialDefinition = {
   name: '面积图',
@@ -77,6 +78,7 @@ export const areaMaterial: MaterialDefinition = {
       span: 12,
     },
   ],
+  eventOptions: chartEventOptions,
   schema: {
     type: 'area-chart',
     name: '面积图',

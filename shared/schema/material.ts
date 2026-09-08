@@ -38,7 +38,7 @@ interface SetterSchema {
   [key: string]: any
 }
 
-interface EventOption {
+export interface EventOption {
   label: string
   value: string
 }

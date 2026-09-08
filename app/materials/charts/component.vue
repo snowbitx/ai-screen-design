@@ -23,9 +23,10 @@ const option = computed(() => {
   const _option = props.schema.props.option
   return {
     ..._option,
+    // 雷达/仪表/旭日/树等图型没有 dataset，兜底空对象防止 spread undefined 崩溃
     dataset: {
+      source: data.value || _option.dataset?.source || [],
       ..._option.dataset,
-      source: data.value || _option.dataset.source,
     },
   }
 })
@@ -33,7 +34,8 @@ const option = computed(() => {
 watch(
   option,
   (newValue) => {
-    chart.setOption(newValue)
+    // 组件挂载前 chart 还未初始化，此时变更不作用于实例（onMounted 会 setOption 首渲染）
+    if (chart) chart.setOption(newValue)
   },
   { deep: true },
 )

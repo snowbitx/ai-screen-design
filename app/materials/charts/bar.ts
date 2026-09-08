@@ -1,4 +1,5 @@
 import type { MaterialDefinition } from '@shared/schema/material.ts'
+import { chartEventOptions } from './common.ts'
 
 export const barMaterial: MaterialDefinition = {
   name: '柱状图',
@@ -73,6 +74,7 @@ export const barMaterial: MaterialDefinition = {
       span: 12,
     },
   ],
+  eventOptions: chartEventOptions,
   schema: {
     type: 'bar-chart',
     name: '柱状图',

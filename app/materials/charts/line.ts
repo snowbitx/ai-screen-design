@@ -1,4 +1,5 @@
 import type { MaterialDefinition } from '@shared/schema/material.ts'
+import { chartEventOptions } from './common.ts'
 
 export const lineMaterial: MaterialDefinition = {
   name: '折线图',
@@ -72,6 +73,7 @@ export const lineMaterial: MaterialDefinition = {
       span: 12,
     },
   ],
+  eventOptions: chartEventOptions,
   schema: {
     type: 'line-chart',
     name: '折线图',

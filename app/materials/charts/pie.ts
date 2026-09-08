@@ -1,4 +1,5 @@
 import type { MaterialDefinition } from '@shared/schema/material.ts'
+import { chartEventOptions } from './common.ts'
 
 export const pieMaterial: MaterialDefinition = {
   name: '饼图',
@@ -48,6 +49,7 @@ export const pieMaterial: MaterialDefinition = {
       key: 'props.option.series.0.encode.value',
     },
   ],
+  eventOptions: chartEventOptions,
   schema: {
     type: 'pie-chart',
     name: '饼图',
