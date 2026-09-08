@@ -10,6 +10,7 @@ export const useEditorStore = defineStore('editor', () => {
     material: true,
     layer: true,
     property: true,
+    ai: true,
   })
 
   const page = ref<PageSchema>({

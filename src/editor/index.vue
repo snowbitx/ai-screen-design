@@ -9,7 +9,7 @@ import PropertyPanel from '@/editor/panels/property/index.vue'
 import { storeToRefs } from 'pinia'
 import { useRoute } from 'vue-router'
 import { getPublishedPage } from '@/utils/publish.ts'
-
+import AiPanel from '@/editor/panels/ai/index.vue'
 defineOptions({
   name: 'ScreenEditor',
 })
@@ -32,6 +32,7 @@ provide('dataSources', dataSources)
 const materialWidth = computed(() => (editorStore.panelVisible.material ? '260px' : '0'))
 const layerWidth = computed(() => (editorStore.panelVisible.layer ? '160px' : '0'))
 const propertyWidth = computed(() => (editorStore.panelVisible.property ? '360px' : '0'))
+const aiWidth = computed(() => (editorStore.panelVisible.ai ? '360px' : '0'))
 </script>
 
 <template>
@@ -57,6 +58,9 @@ const propertyWidth = computed(() => (editorStore.panelVisible.property ? '360px
         class="property overflow-hidden transition-all"
         :style="{ width: propertyWidth }"
       />
+
+      <!--   AI   -->
+      <AiPanel class="ai overflow-hidden transition-all" :style="{ width: aiWidth }" />
     </main>
   </div>
 </template>
@@ -74,7 +78,8 @@ const propertyWidth = computed(() => (editorStore.panelVisible.property ? '360px
   .layer {
     border-right: 1px solid var(--border-color);
   }
-  .property {
+  .property,
+  .ai {
     border-left: 1px solid var(--border-color);
   }
 }

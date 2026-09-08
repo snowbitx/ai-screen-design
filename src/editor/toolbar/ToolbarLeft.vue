@@ -29,6 +29,9 @@ const { undo, redo, canUndo, canRedo } = useUndoRedo()
     <span :class="{ active: panelVisible.layer }" @click="panelVisible.layer = !panelVisible.layer">
       <Icon icon="fe:layer"></Icon>
     </span>
+    <span :class="{ active: panelVisible.ai }" @click="panelVisible.ai = !panelVisible.ai">
+      <Icon icon="mdi:robot-outline"></Icon>
+    </span>
     <span @click="undo" :class="{ disabled: !canUndo }">
       <Icon icon="ic:baseline-undo"></Icon>
     </span>
