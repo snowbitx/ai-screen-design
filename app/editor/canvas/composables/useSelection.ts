@@ -11,10 +11,14 @@ export function useSelection({ stageRef, moveableRef }) {
   watch(
     selectedNodeIds,
     (ids) => {
-      selectedTarget.value = ids.map((id) => {
-        // id相同不能被锁定
-        return stageRef.value.querySelector(`[data-node-id="${id}"]:not([data-node-locked='true'])`)
-      })
+      selectedTarget.value = ids
+        .map((id) => {
+          // id相同不能被锁定
+          return stageRef.value.querySelector(`[data-node-id="${id}"]:not([data-node-locked='true'])`)
+        })
+        // 新拖入的节点此刻可能还没渲染进 DOM，过滤 undefined，
+        // 否则 Moveable 收到 undefined target 内部崩溃并卡死 Vue 渲染队列
+        .filter(Boolean)
     },
     { deep: true, flush: 'post' },
   )
