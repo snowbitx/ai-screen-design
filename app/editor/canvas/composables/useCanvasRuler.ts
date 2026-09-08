@@ -1,12 +1,24 @@
 import { debounce } from '@/utils'
 import { useEditorStore } from '@/stores/editor.ts'
+import { useTheme } from '@/composables/useTheme.ts'
 import { storeToRefs } from 'pinia'
 
-export function useCanvasRuler({ moveableRef, canvasRootRef }) {
-  const editorStore = useEditorStore()
-  // storeToRefs只能解构属性，方法必须手动取
-  const { canvas } = storeToRefs(editorStore)
-  const palette = {
+// 标尺双主题配色：shadcn 浅色 / 经典暗色
+const PALETTES = {
+  shadcn: {
+    bgColor: '#f4f4f5',
+    longfgColor: '#d4d4d4',
+    fontColor: '#737373',
+    fontShadowColor: '#0f172a',
+    shadowColor: 'rgba(15, 23, 42, 0.08)',
+    lineColor: '#22c55e',
+    lineType: 'solid',
+    lockLineColor: '#a1a1aa',
+    borderColor: '#e4e4e7',
+    hoverBg: '#fafafa',
+    hoverColor: '#171717',
+  },
+  classic: {
     bgColor: '#1f2937',
     longfgColor: '#6b7280',
     fontColor: '#9ca3af',
@@ -18,7 +30,15 @@ export function useCanvasRuler({ moveableRef, canvasRootRef }) {
     borderColor: '#374151',
     hoverBg: '#111827',
     hoverColor: '#ffffff',
-  }
+  },
+}
+
+export function useCanvasRuler({ moveableRef, canvasRootRef }) {
+  const editorStore = useEditorStore()
+  // storeToRefs只能解构属性，方法必须手动取
+  const { canvas } = storeToRefs(editorStore)
+  const { isClassic } = useTheme()
+  const palette = computed(() => PALETTES[isClassic.value ? 'classic' : 'shadcn'])
 
   const lines = ref({ h: [], v: [] })
   const scale = ref(1)

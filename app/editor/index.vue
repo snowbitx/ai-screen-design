@@ -37,8 +37,8 @@ const aiWidth = computed(() => (editorStore.panelVisible.ai ? '360px' : '0'))
 </script>
 
 <template>
-  <div class="editor h-screen select-none">
-    <header class="header h-56 flex items-center px-20">
+  <div class="editor h-screen select-none text-foreground">
+    <header class="header h-56 flex items-center px-20 bg-card">
       <ToolbarLeft class="w-300" />
       <div class="flex-1 text-center">title</div>
       <ToolbarRight class="w-300" />
@@ -68,20 +68,20 @@ const aiWidth = computed(() => (editorStore.panelVisible.ai ? '360px' : '0'))
 
 <style scoped lang="scss">
 .editor {
-  background: var(--bg-color);
+  background: var(--background);
   .header {
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border);
   }
   .editor-main {
     height: calc(100% - 56px);
   }
   .material,
   .layer {
-    border-right: 1px solid var(--border-color);
+    border-right: 1px solid var(--border);
   }
   .property,
   .ai {
-    border-left: 1px solid var(--border-color);
+    border-left: 1px solid var(--border);
   }
 }
 </style>

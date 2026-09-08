@@ -39,23 +39,43 @@ const currentMaterials = computed(() => {
 
 <style scoped lang="scss">
 .material-panel {
-  background: bg-mix(20);
+  background: var(--background);
   .nav {
-    border-right: 1px solid var(--border-color);
+    border-right: 1px solid var(--border);
+    background: var(--muted);
     div {
       height: 50px;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
+      gap: 2px;
       font-size: 12px;
+      color: var(--muted-foreground);
+      cursor: pointer;
+      position: relative;
+      transition: all 150ms ease;
+      &:hover {
+        color: var(--foreground);
+      }
       &.active {
-        background: bg-mix(70);
+        background: var(--background);
+        color: var(--foreground);
+        &::before {
+          content: '';
+          position: absolute;
+          left: 0;
+          top: 12px;
+          bottom: 12px;
+          width: 2px;
+          border-radius: 1px;
+          background: var(--primary);
+        }
       }
     }
   }
   .material-list {
-    scrollbar-color: #446b6b transparent;
+    scrollbar-color: color-mix(in srgb, var(--foreground) 25%, transparent) transparent;
     scrollbar-width: thin;
   }
 }

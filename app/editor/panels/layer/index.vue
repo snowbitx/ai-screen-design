@@ -33,7 +33,7 @@ useDraggable('.layer-panel', nodes, {
 <style scoped lang="scss">
 .layer-panel {
   padding: 10px;
-  background: bg-mix(50);
+  background: var(--background);
   display: flex;
   flex-direction: column-reverse;
   justify-content: start;
@@ -45,12 +45,19 @@ useDraggable('.layer-panel', nodes, {
     cursor: pointer;
     padding: 0 10px;
     height: 30px;
-    border: 1px solid var(--bg-color);
-    background: bg-mix(70);
+    border: 1px solid var(--border);
+    background: var(--card);
     font-size: 12px;
-    border-radius: 4px;
+    color: var(--foreground);
+    border-radius: calc(var(--radius) - 2px);
+    transition: all 150ms ease;
+    &:hover {
+      background: var(--accent);
+    }
     &.active {
-      background: #0e8ba7;
+      background: color-mix(in srgb, var(--primary) 14%, transparent);
+      color: var(--primary);
+      border-color: color-mix(in srgb, var(--primary) 40%, var(--border));
     }
   }
 }

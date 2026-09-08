@@ -1,3 +1,4 @@
+/* 基于 card/foreground 的透明混合，两套主题自动适配（原为 bg-color 混黑） */
 @function bg-mix($value) {
-  @return color-mix(in srgb, var(--bg-color), black #{$value + '%'});
+  @return color-mix(in srgb, var(--card), var(--foreground) #{$value * 0.3 + '%'});
 }

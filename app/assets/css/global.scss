@@ -1,4 +1,4 @@
 * {
-  scrollbar-color: #446b6b transparent;
+  scrollbar-color: color-mix(in srgb, var(--foreground) 25%, transparent) transparent;
   scrollbar-width: thin;
 }

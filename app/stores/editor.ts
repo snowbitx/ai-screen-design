@@ -10,7 +10,8 @@ export const useEditorStore = defineStore('editor', () => {
     material: true,
     layer: true,
     property: true,
-    ai: true,
+    // AI 面板还是占位样式，默认收起
+    ai: false,
   })
 
   const page = ref<PageSchema>({

@@ -8,9 +8,8 @@ export default defineNuxtConfig({
   modules: ['@pinia/nuxt', ['@element-plus/nuxt', { cache: true }]],
 
   app: {
-    // 原 index.html 的 <html class="dark"> 等头部信息
     head: {
-      htmlAttrs: { lang: 'zh-CN', class: 'dark' },
+      htmlAttrs: { lang: 'zh-CN' },
       title: 'AI Screen Design',
       meta: [
         { charset: 'utf-8' },
@@ -20,10 +19,7 @@ export default defineNuxtConfig({
     },
   },
 
-  css: [
-    '~/assets/main.css',
-    'element-plus/theme-chalk/dark/css-vars.css',
-  ],
+  css: ['~/assets/main.css'],
 
   alias: {
     // 存量代码都用 @/xxx 导入，保持不变

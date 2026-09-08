@@ -128,9 +128,20 @@ async function onPublish() {
 <style scoped lang="scss">
 .toolbar-right {
   span {
-    border: 1px solid #3b465b;
-    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
     cursor: pointer;
+    color: var(--muted-foreground);
+    transition: all 150ms ease;
+
+    &:hover {
+      background: var(--accent);
+      color: var(--accent-foreground);
+    }
   }
 }
 </style>

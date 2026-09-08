@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import './css/themes.css';
 @import './css/variable.scss';
 @import './css/global.scss';
 @theme {

@@ -1,0 +1,130 @@
+/*
+ * 主题体系：语义变量 + 双主题
+ * - 默认 :root 为 shadcn Neutral（浅色）
+ * - .theme-classic 为原暗色主题（#1b2436 底 + teal 强调）
+ * - 旧变量 --border-color / --bg-color 桥接到语义变量，存量代码无需改动
+ * - element-plus 通过 --el-* 桥接段适配两套主题
+ */
+
+:root {
+  /* shadcn Neutral */
+  --radius: 0.5rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+
+  /* 旧变量桥接：存量代码继续可用 */
+  --border-color: var(--border);
+  --bg-color: var(--background);
+
+  /* element-plus 桥接 */
+  --el-bg-color: var(--card);
+  --el-bg-color-overlay: var(--popover);
+  --el-fill-color-blank: var(--background);
+  --el-fill-color-light: var(--accent);
+  --el-border-color: var(--border);
+  --el-border-color-light: var(--border);
+  --el-border-color-lighter: var(--border);
+  --el-text-color-primary: var(--foreground);
+  --el-text-color-regular: var(--foreground);
+  --el-text-color-secondary: var(--muted-foreground);
+  --el-text-color-placeholder: var(--muted-foreground);
+  --el-color-primary: var(--foreground);
+  --el-color-primary-light-3: color-mix(in srgb, var(--foreground), var(--background) 30%);
+  --el-color-primary-light-5: color-mix(in srgb, var(--foreground), var(--background) 50%);
+  --el-color-primary-light-7: color-mix(in srgb, var(--foreground), var(--background) 70%);
+  --el-color-primary-light-8: color-mix(in srgb, var(--foreground), var(--background) 80%);
+  --el-color-primary-light-9: var(--accent);
+  --el-color-primary-dark-2: color-mix(in srgb, var(--foreground), black 20%);
+  --el-mask-color: color-mix(in srgb, var(--background), transparent 40%);
+
+  color-scheme: light;
+}
+
+/* 原暗色主题：经典大屏编辑器配色 */
+:root.theme-classic {
+  --background: #0d121b;
+  --foreground: #e2e8f0;
+  --card: #1b2436;
+  --card-foreground: #e2e8f0;
+  --popover: #1f2937;
+  --popover-foreground: #e2e8f0;
+  --primary: #0ea5b7;
+  --primary-foreground: #0d121b;
+  --secondary: #243147;
+  --secondary-foreground: #e2e8f0;
+  --muted: #243147;
+  --muted-foreground: #94a3b8;
+  --accent: #243147;
+  --accent-foreground: #e2e8f0;
+  --destructive: #ef4444;
+  --border: #334155;
+  --input: #334155;
+  --ring: #0ea5b7;
+
+  --el-color-primary: #0ea5b7;
+  --el-color-primary-light-3: #3aa9b7;
+  --el-color-primary-light-5: #6fbdb7;
+  --el-color-primary-light-7: #9dd1d1;
+  --el-color-primary-light-9: #243147;
+  --el-color-primary-dark-2: #0b8492;
+
+  color-scheme: dark;
+}
+
+/* tailwind 工具类映射 */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+    outline-color: color-mix(in srgb, var(--ring), transparent 50%);
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+  }
+}
