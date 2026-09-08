@@ -18,7 +18,8 @@ export const useEditorStore = defineStore('editor', () => {
     canvas: {
       width: 1920,
       height: 1080,
-      backgroundColor: '#0d121b',
+      // 默认浅色画布，匹配 shadcn 主题（用户可随时在画布属性里改）
+      backgroundColor: '#f4f4f5',
     },
     // 和下面的nodes是同一个东西，用page 是聚合dsl数据。
     nodes: [],
