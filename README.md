@@ -68,8 +68,3 @@ Node.js 要求 `^22.18.0 || >=24.12.0`。
 ## 发布数据存储
 
 发布接口使用 Nitro 的 `useStorage('data')`，默认写入项目根目录 `.data/`（已 gitignore）。该抽象与驱动解耦，需要多实例共享时在 `nuxt.config.ts` 里换 Redis 等驱动即可，业务代码不用动。
-
-## 文档
-
-- [架构设计](./docs/architecture-design.md)
-- [学习笔记](./docs/project-learning-guide.md)
