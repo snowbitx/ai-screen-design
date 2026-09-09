@@ -5,7 +5,7 @@ defineOptions({
   name: 'MaterialPanel',
 })
 
-const activeGroup = ref('info')
+const activeGroup = ref('charts')
 
 const groups = getMaterialGroups()
 const currentMaterials = computed(() => {
