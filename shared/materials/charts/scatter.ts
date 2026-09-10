@@ -5,7 +5,7 @@ import { chartEventOptions, cartesianSetters } from './common.ts'
 export const scatterMaterial: MaterialDefinition = {
   name: '散点图',
   group: 'charts',
-  icon: 'flat-color-icons:statistical-data',
+  icon: 'flat-color-icons:scatter-plot',
   setters: [
     ...cartesianSetters({
       seriesColorLabel: '点颜色',

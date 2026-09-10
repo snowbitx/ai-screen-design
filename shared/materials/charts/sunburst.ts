@@ -5,7 +5,7 @@ import { chartEventOptions } from './common.ts'
 export const sunburstMaterial: MaterialDefinition = {
   name: '旭日图',
   group: 'charts',
-  icon: 'flat-color-icons:donut-small',
+  icon: 'flat-color-icons:doughnut-chart',
   setters: [
     { type: 'input', label: '标题', key: 'props.option.title.text' },
     { type: 'color', label: '标题色', key: 'props.option.title.textStyle.color' },

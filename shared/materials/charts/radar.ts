@@ -5,7 +5,7 @@ import { chartEventOptions } from './common.ts'
 export const radarMaterial: MaterialDefinition = {
   name: '雷达图',
   group: 'charts',
-  icon: 'flat-color-icons:radar-chart',
+  icon: 'flat-color-icons:radar-plot',
   setters: [
     { type: 'input', label: '标题', key: 'props.option.title.text' },
     { type: 'color', label: '标题色', key: 'props.option.title.textStyle.color' },

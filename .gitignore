@@ -44,5 +44,12 @@ __screenshots__/
 .data
 .dist
 
+# Secrets
+.env
+.env.*
+
 # ZCode plans (迁移方案等会话产物，不入库)
 .zcode/
+
+# 面试笔记（仅本地，不入库）
+docs/interview-guide.md

@@ -134,7 +134,7 @@ defineExpose({
           ></el-select>
         </el-form-item>
         <el-form-item label="函数体">
-          <div class="flex w-full flex-col bg-[#1e1e1e]">
+          <div class="flex w-full flex-col bg-[var(--card)] text-[var(--foreground)]">
             <div class="flex-none pl-30">function{{ activeEvent.name }} ($context,$node)</div>
             <monaco-editor
               class="flex-1"

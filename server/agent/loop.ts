@@ -1,5 +1,6 @@
-import { Agent, type AgentMessage } from '@mariozechner/pi-agent-core'
-import { getModel, type Model } from '@mariozechner/pi-ai'
+import { Agent, type AgentMessage } from '@earendil-works/pi-agent-core'
+import { createProvider, envApiKeyAuth, lazyApi, type Model } from '@earendil-works/pi-ai'
+import { builtinModels } from '@earendil-works/pi-ai/providers/all'
 import type { PageSchema } from '@shared/schema/page.ts'
 import { describeMaterials } from './materials.ts'
 import { createScreenTools, type Workspace } from './tools.ts'
@@ -14,16 +15,33 @@ interface AiRuntimeConfig {
 const DEFAULT_PROVIDER = 'moonshotai'
 const DEFAULT_MODEL_ID = 'kimi-k2-0905-preview'
 
+// pi-ai 0.85 起：Agent 需要显式 streamFn（Models.streamSimple 满足该形状），
+// 模型查询与流式请求统一走 builtinModels 实例（内置 provider + 运行时注册的自定义
+// provider），auth 走 envApiKeyAuth（请求级 apiKey 优先，其次 env）
+const runtimeModels = builtinModels()
+
+function registerRuntimeProvider(provider: string, baseUrl?: string) {
+  if (runtimeModels.getProvider(provider)) return
+  runtimeModels.setProvider(createProvider({
+    id: provider,
+    name: provider,
+    baseUrl: baseUrl || '',
+    auth: { apiKey: envApiKeyAuth(`API key for ${provider}`, [`${provider.toUpperCase().replace(/-/g, '_')}_API_KEY`]) },
+    models: [],
+    api: lazyApi(() => import('@earendil-works/pi-ai/api/openai-completions')),
+  }))
+}
+
 function resolveModel(ai: AiRuntimeConfig): Model<any> {
   const provider = ai.provider || DEFAULT_PROVIDER
   const modelId = ai.model || DEFAULT_MODEL_ID
-  // provider 支持运行时通过 env 扩展，绕开 KnownProvider 字面量约束
-  const model = getModel(provider as any, modelId as any) as Model<any> | undefined
+  registerRuntimeProvider(provider, ai.baseUrl)
+  const model = runtimeModels.getModel(provider, modelId)
   if (model) {
-    if (ai.baseUrl) model.baseUrl = ai.baseUrl
-    return model
+    // 目录对象是共享实例，覆盖 baseUrl 必须浅拷贝，避免跨请求污染
+    return ai.baseUrl ? { ...model, baseUrl: ai.baseUrl } : model
   }
-  // 内置目录没有该 provider/model 时，按 OpenAI 兼容协议对接（自建网关、代理等）
+  // 目录没有该 model 时，按 OpenAI 兼容协议对接（自建网关、代理等）
   return {
     id: modelId,
     name: modelId,
@@ -111,6 +129,9 @@ export async function runScreenAgent(
         }
       }),
     },
+    // 新版 pi-agent-core 必须显式提供 streamFn；Models.streamSimple 即所需形状
+    streamFn: (model, context, options) =>
+      runtimeModels.streamSimple(model as any, context, { ...options, apiKey: ai.apiKey }),
     getApiKey: () => ai.apiKey,
   })
 

@@ -37,13 +37,6 @@ const { undo, redo, canUndo, canRedo } = useUndoRedo()
     >
       <Icon icon="fe:layer"></Icon>
     </span>
-    <span
-      :class="{ active: panelVisible.ai }"
-      title="AI 助手"
-      @click="panelVisible.ai = !panelVisible.ai"
-    >
-      <Icon icon="mdi:robot-outline"></Icon>
-    </span>
     <span class="divider"></span>
     <span :class="{ disabled: !canUndo }" title="撤销" @click="undo">
       <Icon icon="ic:baseline-undo"></Icon>
