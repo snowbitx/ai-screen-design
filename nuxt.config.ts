@@ -25,6 +25,17 @@ export default defineNuxtConfig({
 
   css: ['~/assets/main.css'],
 
+  // Agent Server 的 LLM 配置，通过环境变量注入：
+  // NUXT_AI_PROVIDER / NUXT_AI_MODEL / NUXT_AI_BASE_URL / NUXT_AI_API_KEY
+  runtimeConfig: {
+    ai: {
+      provider: 'moonshotai',
+      model: 'kimi-k2-0905-preview',
+      baseUrl: '',
+      apiKey: '',
+    },
+  },
+
   alias: {
     // 存量代码都用 @/xxx 导入，保持不变
     '@': fileURLToPath(new URL('./app', import.meta.url)),

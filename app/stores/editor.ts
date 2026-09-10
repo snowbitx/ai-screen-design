@@ -101,6 +101,19 @@ export const useEditorStore = defineStore('editor', () => {
   function setPage(newPage: PageSchema) {
     Object.assign(page.value, newPage)
   }
+
+  /**
+   * 应用 AI 生成的页面 DSL：整体替换 nodes，并合并画布与数据源。
+   * 走 applyChange 记入撤销栈，可以一键撤销 AI 的修改。
+   */
+  function applyAiPage(newPage: PageSchema) {
+    applyChange(page.value, 'nodes', JSON.parse(JSON.stringify(newPage.nodes)))
+    applyChange(page.value, 'dataSources', JSON.parse(JSON.stringify(newPage.dataSources || [])))
+    applyChange(canvas.value, 'width', newPage.canvas.width)
+    applyChange(canvas.value, 'height', newPage.canvas.height)
+    applyChange(canvas.value, 'backgroundColor', newPage.canvas.backgroundColor)
+  }
+
   // 当前选中节点的id
   const selectedNodeIds = ref([])
   // 支持多选后，拿多选的结构来维护，这样可以共用清除选中
@@ -196,5 +209,6 @@ export const useEditorStore = defineStore('editor', () => {
     toggleLock,
     updateNode,
     setPage,
+    applyAiPage,
   }
 })
