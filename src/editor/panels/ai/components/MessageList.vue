@@ -19,7 +19,8 @@ defineProps(['messages'])
         <Icon :icon="message.type === 'human' ? 'mdi:account' : 'mdi:robot-outline'" />
       </el-avatar>
       <div class="message-content">
-        {{ message.text }}
+        <span v-if="message.text">{{ message.text }}</span>
+        <span v-else class="typing">...</span>
       </div>
     </div>
   </div>
@@ -62,5 +63,18 @@ defineProps(['messages'])
   flex-direction: column;
   gap: 16px;
   overflow-y: auto;
+}
+
+.typing {
+  animation: typing-animation 1s infinite;
+}
+@keyframes typing-animation {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 </style>
