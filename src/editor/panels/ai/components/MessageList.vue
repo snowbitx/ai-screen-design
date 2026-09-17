@@ -1,26 +1,65 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
-
+import MarkdownRender from 'markstream-vue'
+import 'markstream-vue/index.css'
 defineOptions({
   name: 'MessageList',
 })
-defineProps(['messages'])
+const props = defineProps(['messages', 'isLoading'])
+
+const messageListRef = useTemplateRef('messageList')
+const messageContainerRef = useTemplateRef('messageContainer')
+
+// ai的消息为空不展示消息，最后一条消息为loading时要展示
+const visibleMessages = computed(() => {
+  const lastIndex = props.messages.length - 1
+  return props.messages.filter(
+    (item, index) => item.text || (lastIndex === index && props.isLoading),
+  )
+})
+let isScroll = true
+onMounted(() => {
+  const resizeObserver = new ResizeObserver(() => {
+    console.log('高度变化了')
+    if (!isScroll) return
+    const el = messageContainerRef.value
+    el.scrollTop = el.scrollHeight
+  })
+  resizeObserver.observe(messageListRef.value)
+})
+
+function onScroll() {
+  const el = messageContainerRef.value
+  // 手动滚动时 如果滚动快到底部时 开启自动滚动 否则暂停自动滚动
+  isScroll = el.scrollHeight - el.scrollTop - el.clientHeight <= 30
+}
 </script>
 
 <template>
-  <div class="message-container">
-    <div
-      v-for="message in messages"
-      :key="message.id"
-      class="message-box flex gap-10 overflow-auto -m-20 p-20"
-      :class="message.type"
-    >
-      <el-avatar class="avatar" :size="28">
-        <Icon :icon="message.type === 'human' ? 'mdi:account' : 'mdi:robot-outline'" />
-      </el-avatar>
-      <div class="message-content">
-        <span v-if="message.text">{{ message.text }}</span>
-        <span v-else class="typing">...</span>
+  <div ref="messageContainer" class="message-container" @scroll="onScroll">
+    <div ref="messageList" class="flex flex-col gap-10 py-10">
+      <div
+        v-for="message in visibleMessages"
+        :key="message.id"
+        class="message-box flex gap-10 overflow-auto -m-20 p-20"
+        :class="message.type"
+      >
+        <el-avatar class="avatar" :size="28">
+          <Icon :icon="message.type === 'human' ? 'mdi:account' : 'mdi:robot-outline'" />
+        </el-avatar>
+        <div class="message-content">
+          <!--        <span v-if="message.text">{{ message.text }}</span>-->
+          <MarkdownRender
+            v-if="message.text"
+            :render-code-blocks-as-pre="false"
+            :code-block-props="{ showCopyButton: true }"
+            :content="message.text"
+            mode="chat"
+            html-policy="escape"
+            :final="true"
+          />
+          <span v-else class="typing">...</span>
+        </div>
       </div>
     </div>
   </div>
