@@ -27,20 +27,21 @@ const { messages, submit, isLoading, stop, client } = useStream({
 })
 
 function onSubmit() {
-  if (!isLoading) return
+  console.log('page.value ==> ', page.value)
+  if (isLoading.value) return
   submit({
     messages: [
       {
         type: 'human',
         content: message.value,
-        page: page.value,
-        selectedNodeIds: selectedNodeIds.value,
-        schema: {
-          material: getAllMaterialSchema(),
-          canvas: CanvasSchema.toJSONSchema(),
-        },
       },
     ],
+    page: page.value,
+    selectedNodeIds: selectedNodeIds.value,
+    schema: {
+      material: getAllMaterialSchema(),
+      canvas: CanvasSchema.toJSONSchema(),
+    },
   })
   message.value = ''
 }
