@@ -1,3 +1,5 @@
+import type { ZodType } from 'zod'
+
 interface Layout {
   x: number
   y: number
@@ -46,8 +48,9 @@ export interface MaterialDefinition {
   name: string
   group: string
   icon: string
+  configSchema: ZodType
   setters: SetterSchema[]
-  eventOptions: EventOption[]
+  eventOptions?: EventOption[]
   // 初始化物料时不需要id，id只在运行时需要 会拖拽drop时存入
   schema: Omit<MaterialSchema, 'id'>
 }

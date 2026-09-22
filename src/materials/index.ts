@@ -59,3 +59,15 @@ export function createNode(node: MaterialSchema) {
     id: window.crypto.randomUUID(),
   }
 }
+
+// 发给大模型
+export function getAllMaterialSchema() {
+  return materials.map((item) => {
+    return {
+      type: item.schema.type,
+      name: item.name,
+      // zod格式是js对象要通过http传要转成标准scema
+      configSchema: item.configSchema.toJSONSchema(),
+    }
+  })
+}

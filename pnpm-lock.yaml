@@ -59,6 +59,9 @@ importers:
       vue3-sketch-ruler:
         specifier: 2.4.0
         version: 2.4.0
+      zod:
+        specifier: ^4.6.5
+        version: 4.6.5
     devDependencies:
       '@iconify/vue':
         specifier: ^5.0.1

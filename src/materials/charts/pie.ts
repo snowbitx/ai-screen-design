@@ -1,9 +1,11 @@
 import type { MaterialDefinition } from '@/schema/material.ts'
+import { createChartNodeSchema } from '@/materials/charts/schema.ts'
 
 export const pieMaterial: MaterialDefinition = {
   name: '饼图',
   group: 'charts',
   icon: 'fluent-color:list-bar-16',
+  configSchema: createChartNodeSchema('pie-chart'),
   setters: [
     {
       type: 'input',

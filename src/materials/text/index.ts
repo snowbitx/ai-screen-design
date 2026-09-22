@@ -1,11 +1,13 @@
 import TextMaterial from './component.vue'
 import type { MaterialDefinition } from '@/schema/material.ts'
+import { TextSchema } from '@/materials/text/schame.ts'
 
 const textMaterial: MaterialDefinition = {
   // 物料元数据
   name: '文本',
   group: 'info',
   icon: 'solar:text-bold',
+  configSchema: TextSchema,
   // 表单的配置
   setters: [
     {

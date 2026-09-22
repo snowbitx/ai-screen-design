@@ -31,7 +31,8 @@
     "vue-router": "^5.1.0",
     "vue3-moveable": "^0.28.0",
     "vue3-selecto": "^1.12.3",
-    "vue3-sketch-ruler": "2.4.0"
+    "vue3-sketch-ruler": "2.4.0",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@iconify/vue": "^5.0.1",

@@ -2,11 +2,17 @@
 import MessageList from '@/editor/panels/ai/components/MessageList.vue'
 import { useStream } from '@langchain/vue'
 import { deleteThreadId, getThreadId, setThreadId } from '@/editor/panels/ai/thread-storage.ts'
+import { storeToRefs } from 'pinia'
+import { useEditorStore } from '@/stores/editor.ts'
+import { getAllMaterialSchema } from '@/materials'
+import { CanvasSchema } from '@/editor/schema/common.ts'
 
 defineOptions({
   name: 'AiPanel',
 })
 const message = ref('')
+
+const { page, selectedNodeIds } = storeToRefs(useEditorStore())
 
 const { messages, submit, isLoading, stop, client } = useStream({
   apiUrl: 'http://localhost:2024',
@@ -27,6 +33,12 @@ function onSubmit() {
       {
         type: 'human',
         content: message.value,
+        page: page.value,
+        selectedNodeIds: selectedNodeIds.value,
+        schema: {
+          material: getAllMaterialSchema(),
+          canvas: CanvasSchema.toJSONSchema(),
+        },
       },
     ],
   })
@@ -70,7 +82,7 @@ async function onDelete() {
         <el-button v-if="!isLoading" type="primary" @click="onSubmit" :loading="isLoading"
           >发送</el-button
         >
-        <el-button type="danger" @click="onStop">停止</el-button>
+        <el-button v-else type="danger" @click="onStop">停止</el-button>
       </footer>
     </div>
   </div>

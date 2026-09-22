@@ -1,9 +1,11 @@
 import type { MaterialDefinition } from '@/schema/material.ts'
+import { createChartNodeSchema } from '@/materials/charts/schema.ts'
 
 export const barMaterial: MaterialDefinition = {
   name: '柱状图',
   group: 'charts',
   icon: 'fluent-color:list-bar-16',
+  configSchema: createChartNodeSchema('bar-chart'),
   setters: [
     {
       type: 'input',
