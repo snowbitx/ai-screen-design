@@ -31,6 +31,7 @@ onMounted(() => {
 function onScroll() {
   const el = messageContainerRef.value
   // 手动滚动时 如果滚动快到底部时 开启自动滚动 否则暂停自动滚动
+  // 当列表距离底部不超过 30px 时，认为用户仍在查看最新消息，后续内容会自动滚动到底部；当用户向上滚动超过这个范围后，自动滚动会暂停
   isScroll = el.scrollHeight - el.scrollTop - el.clientHeight <= 30
 }
 </script>
