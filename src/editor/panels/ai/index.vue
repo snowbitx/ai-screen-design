@@ -12,9 +12,10 @@ defineOptions({
 })
 const message = ref('')
 
-const { page, selectedNodeIds } = storeToRefs(useEditorStore())
+const editorStore = useEditorStore()
+const { page, selectedNodeIds } = storeToRefs(editorStore)
 
-const { messages, submit, isLoading, stop, client } = useStream({
+const { messages, values, submit, isLoading, stop, client } = useStream({
   apiUrl: 'http://localhost:2024',
   assistantId: 'screen_design_agent',
   // 可改websoket
@@ -25,6 +26,18 @@ const { messages, submit, isLoading, stop, client } = useStream({
     setThreadId(threadId)
   },
 })
+
+// 监听 action 发生变化后，调用编辑器已有的 addNode() 方法
+watch(
+  () => values.value.action,
+  (action: any) => {
+    if (!action) return
+
+    if (action.type === 'add_node') {
+      editorStore.addNode(action.node)
+    }
+  },
+)
 
 function onSubmit() {
   console.log('page.value ==> ', page.value)
