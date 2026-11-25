@@ -41,6 +41,15 @@ export function getMaterialGroups() {
   return groups
 }
 
+/**
+ * 完整物料目录快照。
+ * AI 面板会把它随请求发给服务端，保证模型用的 type/props 和当前前端渲染器一致
+ * （前端新增物料后，AI 不用等服务端发版）。
+ */
+export function getMaterialCatalog() {
+  return materials
+}
+
 // 通过schema中的type找到对应的组件
 export function getMaterialComponent(type: string) {
   return componentMap.get(type)

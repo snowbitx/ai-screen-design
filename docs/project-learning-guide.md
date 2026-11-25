@@ -69,8 +69,12 @@ const textMaterial = {
   name: '文本',
   group: 'info',
   icon: 'solar:text-bold',
-  setters: [/* 右侧属性配置 */],
-  schema: {/* 拖入画布时使用的默认数据 */},
+  setters: [
+    /* 右侧属性配置 */
+  ],
+  schema: {
+    /* 拖入画布时使用的默认数据 */
+  },
 }
 ```
 
@@ -197,10 +201,7 @@ editorStore.selectNode(node.id)
 画布遍历 `nodes`：
 
 ```vue
-<component
-  :is="getMaterialComponent(node.type)"
-  :schema="node"
-/>
+<component :is="getMaterialComponent(node.type)" :schema="node" />
 ```
 
 例如 `node.type` 是 `text`，注册表就会返回 `TextMaterial`。文本组件再读取：
@@ -255,9 +256,7 @@ const selectedNodeIds = ref([])
 
 ```ts
 const selectedNodeId = computed(() => {
-  return selectedNodeIds.value.length === 1
-    ? selectedNodeIds.value[0]
-    : null
+  return selectedNodeIds.value.length === 1 ? selectedNodeIds.value[0] : null
 })
 
 const selectedNode = computed(() => {
@@ -282,9 +281,7 @@ editorStore.selectNode(node.id)
 ```ts
 watch(selectedNodeIds, (ids) => {
   selectedTarget.value = ids.map((id) => {
-    return stageRef.value.querySelector(
-      `[data-node-id="${id}"]:not([data-node-locked='true'])`,
-    )
+    return stageRef.value.querySelector(`[data-node-id="${id}"]:not([data-node-locked='true'])`)
   })
 })
 ```
@@ -520,3 +517,44 @@ src/material/image/
 ```
 
 能独立把这两条线接通，就已经理解了这个项目最重要的部分。
+
+---
+
+# 附：课程章节 → 当前实现对照
+
+> 前面正文是 Vite + `src/` 时代的笔记，现在项目已经是 Nuxt 4（`app/` + `server/` + `shared/`）。
+> 这一节把「Agent 大屏」课程的第八章到第二十六章，逐一对应到现在的代码位置，
+> 便于对照阅读。目录与协议细节见 `docs/agent-server.md`。
+
+总览：模型调用仍是 pi（`pi-ai` + `pi-agent-core`），课程里的「图 + State + 条件边 + 检查点」
+由 `server/agent/graph/` 自己实现，没有引入 LangGraph。
+
+| 章节 | 主题                 | 现在在哪                                                                 | 怎么做的                                                                                                            |
+| ---- | -------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| 八   | 让模型理解编辑器状态 | `shared/schema/agent.ts`、`server/agent/spec/`、`server/agent/prompt.ts` | 请求带完整 page + 选中节点 + **前端物料快照**；节点/数据源结构用 TypeBox 写成 JSON Schema，既进提示词也做运行时校验 |
+| 九   | 意图识别             | `graph/classify.ts`                                                      | 一次结构化调用输出 `{ intent, reason, skills }`；chat 走对话，其余进规划                                            |
+| 十   | 添加节点             | `tools.ts` 的 `add_node` + `graph/plan.ts`                               | 规划器按物料目录选 type，执行器 grid/precision 布点                                                                 |
+| 十一 | 修改节点             | `update_node_props` / `set_node_style` / `set_node_layout`               | 请求带 `selectedNodeIds`，提示词里直接标出选中项，不用模型自己找 id                                                 |
+| 十二 | 流式反馈与回滚       | `chat.post.ts`、`cancel.post.ts`、`graph/checkpoint.ts`、AI 面板         | SSE 推 text/tool/task；取消走独立接口让服务端推完 `rollback`；前端另存快照兜底                                      |
+| 十三 | 操作多个节点         | `graph/plan.ts` + `graph/scheduler.ts`                                   | 需求先整理成 editPlan（任务列表），再逐项生成 patch，逐项下发页面                                                   |
+| 十四 | 创建和修改图表       | `graph/executors/index.ts` + `graph/executors/page.ts`                   | 图表任务带 RAG 上下文；`pruneEmpty` 清掉模型吐出的空对象，避免默认配置被覆盖                                        |
+| 十五 | 构建 ECharts RAG     | `server/agent/rag/`、`scripts/build-rag.ts`                              | 语料按 `##` 切块 → TF/DF → `index.generated.ts`；可选 embedding，失败退回 BM25                                      |
+| 十六 | Agent 调用 RAG       | `rag/tool.ts` + 图表任务预检索                                           | 封装成 `search_echarts_docs` 工具注册进任务 Agent，执行前再自动预检一次                                             |
+| 十七 | 创建和修改数据源     | `add_data_source` / `update_data_source`、`graph/executors/page.ts`      | 支持 static/api、轮询、method、params、responsePath；整页任务会按区块自动建源                                       |
+| 十八 | 图表绑定数据源       | `bind_data_source`、`server/agent/data.ts`                               | 从真实数据推断字段结构写进提示词；绑定时校验并改写 `encode`，避免绑完变空图                                         |
+| 十九 | 串行依赖任务         | `graph/plan.ts` + `scheduler.ts` + `state.ts`                            | 规划阶段写 `${t1.dataSourceId}` 占位符，执行阶段替换；`currentTaskIndex` 记录进度；按类型走各自执行节点             |
+| 二十 | 任务进度             | `graph/state.ts` 的 `markTask`、AI 面板                                  | `plan` 出任务名，`task`/`progress` 出进度条；整次运行合并为一条撤销记录                                             |
+| 二一 | 生成事件             | `set_node_event` / `remove_node_event`、`prompt.ts`                      | 前端事件系统与沙箱已有，工具按 `context` API 生成事件代码                                                           |
+| 二二 | 生成整页内容         | `graph/executors/page.ts`                                                | 结构化输出区块清单 → 12×12 栅格算像素 → 实例化物料 → 建数据源并绑定                                                 |
+| 二三 | 修改画布             | `set_canvas` + `canvas` 任务类型                                         | 画布任务独立成项，可单独回滚                                                                                        |
+| 二四 | 按需加载 Skill       | `server/agent/skills/`                                                   | 只常驻 id+描述，`load_skill` 取正文；命中"科技风"等词自动预加载                                                     |
+| 二五 | 参考图生成           | `shared/schema/agent.ts` 的 `images`、`loop.ts` / `run.ts`               | 前端压到长边 1600px 后 base64 传输，走 `agent.prompt(text, images)`                                                 |
+| 二六 | 并行任务调度         | `graph/scheduler.ts`、`graph/patch.ts`                                   | 每轮取"依赖全完成"的就绪集并行执行，各自产出 patch，按计划顺序合并                                                  |
+
+## 想动手改的时候，从哪进
+
+- **加一个物料**：`shared/materials/` → 服务端目录自动带上，AI 立刻能用。
+- **调提示词**：`server/agent/graph/plan.ts`（怎么拆任务）、`graph/executors/index.ts`（各类型任务的补充要求）。
+- **加一种任务类型**：`shared/schema/agent.ts` 扩 union → `spec/index.ts` 加字面量 → `executors/index.ts` 加分支。
+- **调检索质量**：`server/agent/rag/corpus/*.md` 改完重新 `pnpm rag:build`。
+- **没有模型配额也想验证**：`NUXT_AI_MOCK=1 pnpm dev`，链路是真的，只有模型输出是脚本。

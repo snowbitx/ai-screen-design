@@ -11,7 +11,7 @@ const THEME_CANVAS_BG = {
 }
 
 export const useEditorStore = defineStore('editor', () => {
-  const { applyChange } = useUndoRedo()
+  const { applyChange, startBatch, commitBatch } = useUndoRedo()
   const { isClassic } = useTheme()
 
   const panelVisible = reactive({
@@ -93,7 +93,10 @@ export const useEditorStore = defineStore('editor', () => {
   // 画布背景色还是主题默认值（用户没自定义过）时，切换主题立即跟随，无需刷新
   watch(isClassic, (classic) => {
     const target = classic ? THEME_CANVAS_BG.dark : THEME_CANVAS_BG.light
-    if (canvas.value.backgroundColor === THEME_CANVAS_BG.dark || canvas.value.backgroundColor === THEME_CANVAS_BG.light) {
+    if (
+      canvas.value.backgroundColor === THEME_CANVAS_BG.dark ||
+      canvas.value.backgroundColor === THEME_CANVAS_BG.light
+    ) {
       applyChange(canvas.value, 'backgroundColor', target)
     }
   })
@@ -112,6 +115,19 @@ export const useEditorStore = defineStore('editor', () => {
     applyChange(canvas.value, 'width', newPage.canvas.width)
     applyChange(canvas.value, 'height', newPage.canvas.height)
     applyChange(canvas.value, 'backgroundColor', newPage.canvas.backgroundColor)
+  }
+
+  /**
+   * 一次 AI 运行会产生多次 page 下发（每个任务合并后一次）。
+   * 用撤销批次把它们合成一条记录，用户按一次 Cmd+Z 就能撤掉整次 AI 改动，
+   * 而不是撤十几次才回到运行前。
+   */
+  function beginAiRun() {
+    startBatch()
+  }
+
+  function endAiRun() {
+    commitBatch()
   }
 
   // 当前选中节点的id
@@ -210,5 +226,7 @@ export const useEditorStore = defineStore('editor', () => {
     updateNode,
     setPage,
     applyAiPage,
+    beginAiRun,
+    endAiRun,
   }
 })

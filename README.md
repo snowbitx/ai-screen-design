@@ -9,6 +9,7 @@
 - **属性面板**：按物料动态生成表单（输入/颜色/下拉/数字/勾选），支持 JSON 模式直接编辑节点 DSL
 - **数据源**：静态数据或 API 拉取，支持轮询间隔、响应路径取值、同请求去重
 - **事件系统**：物料可绑定点击/双击等事件，用户写的代码在 Proxy 沙箱中执行，支持跨物料调用
+- **AI 助手**：右侧面板用自然语言改画布。先识别意图、生成带依赖的任务计划，再按任务串行/并行执行，实时显示阶段与进度；可停止并回滚到运行前，支持参考图与设计风格 Skill。后端模型调用用 pi，编排层自建（`server/agent/graph/`），细节见 `docs/agent-server.md`
 - **发布**：页面 schema 存到服务端（Nitro useStorage），发布后通过 `/screen?id=xxx` 访问，服务端渲染出首屏
 - **主题**：编辑器支持 shadcn 风格浅色 / 经典暗色两套主题，切换即时生效并持久化
 
@@ -33,9 +34,18 @@ app/                  # Nuxt 应用层（Nuxt 4 约定的 srcDir）
 ├── runtime/          # 事件沙箱与运行时上下文
 └── assets/           # 主题变量（themes.css 双主题）与样式
 server/               # Nitro 服务端
+├── api/agent/        # AI 助手接口（chat SSE + cancel）
 ├── api/pages/        # 发布页面的存取接口
+├── agent/
+│   ├── graph/        # 编排：意图 → 计划 → 依赖调度 → 执行器 → 回滚
+│   ├── spec/         # 节点/页面/计划的 JSON Schema 与校验
+│   ├── rag/          # ECharts 配置知识库（语料 + 建库产物 + 检索）
+│   ├── skills/       # 按需加载的设计规范（科技风）
+│   ├── tools.ts      # 16 个编辑工具
+│   └── loop.ts       # direct 模式（跳过规划）
 └── api/data.get.ts   # 数据源示例接口
-shared/schema/        # 前后端共用的页面/物料类型定义
+scripts/build-rag.ts  # 知识库建库脚本（pnpm rag:build）
+shared/schema/        # 前后端共用的页面/物料/Agent 事件协议定义
 ```
 
 ## 快速开始

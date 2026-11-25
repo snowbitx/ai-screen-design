@@ -27,12 +27,14 @@ export default defineNuxtConfig({
 
   // Agent Server 的 LLM 配置，通过环境变量注入：
   // NUXT_AI_PROVIDER / NUXT_AI_MODEL / NUXT_AI_BASE_URL / NUXT_AI_API_KEY
+  // NUXT_AI_EMBED_MODEL：可选的 embedding 模型，配了才启用 ECharts 向量检索
   runtimeConfig: {
     ai: {
       provider: 'moonshotai',
       model: 'kimi-k2-0905-preview',
       baseUrl: '',
       apiKey: '',
+      embedModel: '',
     },
   },
 

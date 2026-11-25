@@ -51,5 +51,8 @@ __screenshots__/
 # ZCode plans (迁移方案等会话产物，不入库)
 .zcode/
 
+# WorkBuddy 本地记忆与任务产物
+.workbuddy/
+
 # 面试笔记（仅本地，不入库）
 docs/interview-guide.md

@@ -1,12 +1,15 @@
 import { Type } from '@earendil-works/pi-ai'
 import type { AgentTool } from '@earendil-works/pi-agent-core'
 import type { PageSchema } from '@shared/schema/page.ts'
-import { instantiateMaterial, getDefinition } from './materials.ts'
+import { defaultMaterialCatalog, type MaterialCatalog } from './materials.ts'
+import { alignChartEncode, formatDataShape, describeDataShape } from './data.ts'
 
 export interface Workspace {
   page: PageSchema
   /** 本次会话执行过的工具调用摘要，返回给前端展示 */
   actions: string[]
+  /** 前端当前选中的节点，供模型定位"这个/选中的" */
+  selectedNodeIds?: string[]
 }
 
 function uuid() {
@@ -25,7 +28,10 @@ function findNode(page: PageSchema, id: string) {
  * 大屏编辑工具集：所有修改都作用在传入的 Workspace.page 上。
  * 布局参数用网格布局辅助计算（3 列 5 行），同时保留精确坐标参数。
  */
-export function createScreenTools(workspace: Workspace): AgentTool<any>[] {
+export function createScreenTools(
+  workspace: Workspace,
+  catalog: MaterialCatalog = defaultMaterialCatalog,
+): AgentTool<any>[] {
   const { page } = workspace
 
   const gridCell = (col: number, row: number, spanX = 1, spanY = 1) => {
@@ -74,12 +80,23 @@ export function createScreenTools(workspace: Workspace): AgentTool<any>[] {
           : {
               ...gridCell(params.col ?? 1, params.row ?? 1, params.spanX, params.spanY),
               // 未指定跨距时保留组件默认宽高
-              ...(params.spanX === undefined && params.mode !== 'precision' ? { width: node.layout.width } : {}),
-              ...(params.spanY === undefined && params.mode !== 'precision' ? { height: node.layout.height } : {}),
+              ...(params.spanX === undefined && params.mode !== 'precision'
+                ? { width: node.layout.width }
+                : {}),
+              ...(params.spanY === undefined && params.mode !== 'precision'
+                ? { height: node.layout.height }
+                : {}),
             }
       Object.assign(node.layout, layout)
-      workspace.actions.push(summarize('set_node_layout', `${node.name}(${node.id}) → ${JSON.stringify(node.layout)}`))
-      return { content: [{ type: 'text', text: `已更新 ${node.name} 的布局：${JSON.stringify(node.layout)}` }], details: node.layout }
+      workspace.actions.push(
+        summarize('set_node_layout', `${node.name}(${node.id}) → ${JSON.stringify(node.layout)}`),
+      )
+      return {
+        content: [
+          { type: 'text', text: `已更新 ${node.name} 的布局：${JSON.stringify(node.layout)}` },
+        ],
+        details: node.layout,
+      }
     },
   }
 
@@ -102,7 +119,7 @@ export function createScreenTools(workspace: Workspace): AgentTool<any>[] {
       height: Type.Optional(Type.Number()),
     }),
     execute: async (_id: string, params: any) => {
-      const definition = getDefinition(params.type)
+      const definition = catalog.get(params.type)
       if (!definition) {
         throw new Error(`未知物料类型 ${params.type}，可用类型见系统提示中的物料目录`)
       }
@@ -111,7 +128,7 @@ export function createScreenTools(workspace: Workspace): AgentTool<any>[] {
         params.mode === 'precision'
           ? { x: params.x ?? 0, y: params.y ?? 0, width: params.width, height: params.height }
           : gridCell(params.col ?? 1, params.row ?? 1, params.spanX, params.spanY)
-      const node: any = instantiateMaterial(params.type, id, {
+      const node: any = catalog.instantiate(params.type, id, {
         x: layout.x,
         y: layout.y,
         ...(layout.width ? { width: layout.width } : {}),
@@ -119,9 +136,19 @@ export function createScreenTools(workspace: Workspace): AgentTool<any>[] {
       })
       if (params.name) node.name = params.name
       page.nodes.push(node)
-      workspace.actions.push(summarize('add_node', `${node.name}(${id}) type=${params.type} layout=${JSON.stringify(node.layout)}`))
+      workspace.actions.push(
+        summarize(
+          'add_node',
+          `${node.name}(${id}) type=${params.type} layout=${JSON.stringify(node.layout)}`,
+        ),
+      )
       return {
-        content: [{ type: 'text', text: `已添加 ${node.name}，id=${id}，布局 ${JSON.stringify(node.layout)}` }],
+        content: [
+          {
+            type: 'text',
+            text: `已添加 ${node.name}，id=${id}，布局 ${JSON.stringify(node.layout)}`,
+          },
+        ],
         details: { id, layout: node.layout },
       }
     },
@@ -142,22 +169,37 @@ export function createScreenTools(workspace: Workspace): AgentTool<any>[] {
       const patch = JSON.parse(JSON.stringify(params.props))
       for (const [key, value] of Object.entries(patch)) {
         if (value === undefined) continue
-        if (value !== null && typeof value === 'object' && !Array.isArray(value) && typeof node.props?.[key] === 'object' && node.props[key] !== null) {
+        if (
+          value !== null &&
+          typeof value === 'object' &&
+          !Array.isArray(value) &&
+          typeof node.props?.[key] === 'object' &&
+          node.props[key] !== null
+        ) {
           // 对象做浅合并，数组整体替换
           Object.assign(node.props[key], value)
         } else {
           node.props[key] = value
         }
       }
-      workspace.actions.push(summarize('update_node_props', `${node.name}(${node.id}) props += ${JSON.stringify(patch)}`))
-      return { content: [{ type: 'text', text: `已更新 ${node.name} 的属性` }], details: { props: node.props } }
+      workspace.actions.push(
+        summarize(
+          'update_node_props',
+          `${node.name}(${node.id}) props += ${JSON.stringify(patch)}`,
+        ),
+      )
+      return {
+        content: [{ type: 'text', text: `已更新 ${node.name} 的属性` }],
+        details: { props: node.props },
+      }
     },
   }
 
   const setNodeStyleTool: AgentTool<any> = {
     name: 'set_node_style',
     label: '修改组件样式',
-    description: '合并设置组件的内联样式（style），如 color、fontSize、fontWeight、background 等 CSS 属性。',
+    description:
+      '合并设置组件的内联样式（style），如 color、fontSize、fontWeight、background 等 CSS 属性。',
     parameters: Type.Object({
       id: Type.String({ description: '组件 id' }),
       style: Type.Record(Type.String(), Type.Unknown({ description: 'CSS 样式键值对' })),
@@ -166,8 +208,13 @@ export function createScreenTools(workspace: Workspace): AgentTool<any>[] {
       const node: any = findNode(page, params.id)
       if (!node) throw new Error(`组件 ${params.id} 不存在`)
       node.style = { ...node.style, ...JSON.parse(JSON.stringify(params.style)) }
-      workspace.actions.push(summarize('set_node_style', `${node.name}(${node.id}) style=${JSON.stringify(node.style)}`))
-      return { content: [{ type: 'text', text: `已更新 ${node.name} 的样式` }], details: { style: node.style } }
+      workspace.actions.push(
+        summarize('set_node_style', `${node.name}(${node.id}) style=${JSON.stringify(node.style)}`),
+      )
+      return {
+        content: [{ type: 'text', text: `已更新 ${node.name} 的样式` }],
+        details: { style: node.style },
+      }
     },
   }
 
@@ -183,7 +230,10 @@ export function createScreenTools(workspace: Workspace): AgentTool<any>[] {
       if (index === -1) throw new Error(`组件 ${params.id} 不存在`)
       const [removed] = page.nodes.splice(index, 1)
       workspace.actions.push(summarize('remove_node', `${removed.name}(${removed.id})`))
-      return { content: [{ type: 'text', text: `已删除 ${removed.name}` }], details: { id: removed.id } }
+      return {
+        content: [{ type: 'text', text: `已删除 ${removed.name}` }],
+        details: { id: removed.id },
+      }
     },
   }
 
@@ -202,8 +252,13 @@ export function createScreenTools(workspace: Workspace): AgentTool<any>[] {
       copy.layout.x += 40
       copy.layout.y += 40
       page.nodes.push(copy)
-      workspace.actions.push(summarize('duplicate_node', `${source.name}(${source.id}) → ${copy.id}`))
-      return { content: [{ type: 'text', text: `已复制为 ${copy.name}，id=${copy.id}` }], details: { id: copy.id } }
+      workspace.actions.push(
+        summarize('duplicate_node', `${source.name}(${source.id}) → ${copy.id}`),
+      )
+      return {
+        content: [{ type: 'text', text: `已复制为 ${copy.name}，id=${copy.id}` }],
+        details: { id: copy.id },
+      }
     },
   }
 
@@ -221,7 +276,10 @@ export function createScreenTools(workspace: Workspace): AgentTool<any>[] {
       if (params.height !== undefined) page.canvas.height = params.height
       if (params.backgroundColor !== undefined) page.canvas.backgroundColor = params.backgroundColor
       workspace.actions.push(summarize('set_canvas', JSON.stringify(page.canvas)))
-      return { content: [{ type: 'text', text: `画布已更新：${JSON.stringify(page.canvas)}` }], details: page.canvas }
+      return {
+        content: [{ type: 'text', text: `画布已更新：${JSON.stringify(page.canvas)}` }],
+        details: page.canvas,
+      }
     },
   }
 
@@ -248,8 +306,13 @@ export function createScreenTools(workspace: Workspace): AgentTool<any>[] {
           height: Math.round(cellH),
         }
       })
-      workspace.actions.push(summarize('arrange_grid', `${params.ids.length} 个组件 ${columns} 列排列`))
-      return { content: [{ type: 'text', text: `已按 ${columns} 列排列 ${params.ids.length} 个组件` }], details: { count: params.ids.length } }
+      workspace.actions.push(
+        summarize('arrange_grid', `${params.ids.length} 个组件 ${columns} 列排列`),
+      )
+      return {
+        content: [{ type: 'text', text: `已按 ${columns} 列排列 ${params.ids.length} 个组件` }],
+        details: { count: params.ids.length },
+      }
     },
   }
 
@@ -260,7 +323,9 @@ export function createScreenTools(workspace: Workspace): AgentTool<any>[] {
       '为画布添加数据源，并可选绑定到某个组件。static 用内置演示数据；api 需要给 url（本服务提供 /api/data 演示接口，返回 [{label,value}]）。绑定后组件即用该数据渲染。',
     parameters: Type.Object({
       name: Type.String({ description: '数据源名称' }),
-      type: Type.Union([Type.Literal('static'), Type.Literal('api')], { description: 'static=静态数据，api=接口轮询' }),
+      type: Type.Union([Type.Literal('static'), Type.Literal('api')], {
+        description: 'static=静态数据，api=接口轮询',
+      }),
       url: Type.Optional(Type.String({ description: 'api 类型必填，如 /api/data' })),
       interval: Type.Optional(Type.Number({ description: 'api 轮询间隔毫秒，如 2000' })),
       bindNodeId: Type.Optional(Type.String({ description: '要绑定该数据源的组件 id' })),
@@ -279,16 +344,96 @@ export function createScreenTools(workspace: Workspace): AgentTool<any>[] {
       if (params.interval) dataSource.interval = params.interval
       page.dataSources.push(dataSource)
       let bindText = ''
+      let shapeText = formatDataShape(describeDataShape(dataSource.data))
       if (params.bindNodeId) {
         const node = findNode(page, params.bindNodeId)
         if (!node) throw new Error(`组件 ${params.bindNodeId} 不存在，数据源已添加但未绑定`)
         node.dataId = dataSource.id
-        bindText = `，并已绑定到 ${node.name}`
+        const aligned = alignChartEncode(node, dataSource.data)
+        bindText = `，并已绑定到 ${node.name}${aligned.reason ? `（${aligned.reason}）` : ''}`
       }
-      workspace.actions.push(summarize('add_data_source', `${params.name}(${dataSource.id}) type=${params.type}${bindText}`))
+      workspace.actions.push(
+        summarize(
+          'add_data_source',
+          `${params.name}(${dataSource.id}) type=${params.type}｜${shapeText}${bindText}`,
+        ),
+      )
       return {
-        content: [{ type: 'text', text: `已添加数据源 ${params.name}，id=${dataSource.id}${bindText}` }],
-        details: { id: dataSource.id },
+        content: [
+          {
+            type: 'text',
+            text: `已添加数据源 ${params.name}，id=${dataSource.id}，数据结构 ${shapeText}${bindText}`,
+          },
+        ],
+        details: { id: dataSource.id, shape: describeDataShape(dataSource.data) },
+      }
+    },
+  }
+
+  const updateDataSourceTool: AgentTool<any> = {
+    name: 'update_data_source',
+    label: '修改数据源',
+    description:
+      '修改已有数据源的名称、类型、接口地址、轮询间隔、请求方式、取值路径、请求参数或静态数据。只传要改的字段，其余保持不变。',
+    parameters: Type.Object({
+      id: Type.String({ description: '数据源 id' }),
+      name: Type.Optional(Type.String({ description: '新名称' })),
+      type: Type.Optional(
+        Type.Union([Type.Literal('static'), Type.Literal('api')], {
+          description: 'static=静态数据，api=接口轮询',
+        }),
+      ),
+      url: Type.Optional(Type.String({ description: 'api 类型必填，如 /api/data' })),
+      interval: Type.Optional(Type.Number({ description: '轮询间隔毫秒' })),
+      method: Type.Optional(Type.Union([Type.Literal('get'), Type.Literal('post')])),
+      responsePath: Type.Optional(Type.String({ description: '响应取值路径，如 data.list' })),
+      params: Type.Optional(Type.Record(Type.String(), Type.Unknown({ description: '请求参数' }))),
+      data: Type.Optional(Type.Unknown({ description: '静态数据数组，或 api 的初始数据' })),
+    }),
+    execute: async (_id: string, params: any) => {
+      const source: any = page.dataSources.find((item) => item.id === params.id)
+      if (!source) throw new Error(`数据源 ${params.id} 不存在`)
+
+      const next: any = { ...source }
+      for (const key of [
+        'name',
+        'type',
+        'url',
+        'interval',
+        'method',
+        'responsePath',
+        'params',
+        'data',
+      ]) {
+        if (params[key] !== undefined) next[key] = JSON.parse(JSON.stringify(params[key]))
+      }
+      if (next.type === 'api' && !next.url) {
+        throw new Error('api 类型数据源必须提供 url')
+      }
+      Object.assign(source, next)
+
+      // 数据换了字段也要把已绑定组件的 encode 一起对齐，否则旧图表会变空
+      const alignedNotes: string[] = []
+      for (const node of page.nodes) {
+        if (node.dataId !== source.id) continue
+        const aligned = alignChartEncode(node, source.data)
+        if (aligned.reason) alignedNotes.push(`${node.name}: ${aligned.reason}`)
+      }
+
+      workspace.actions.push(
+        summarize(
+          'update_data_source',
+          `${source.name}(${source.id}) → ${JSON.stringify({ type: source.type, url: source.url, interval: source.interval, responsePath: source.responsePath })}${alignedNotes.length ? `；${alignedNotes.join('；')}` : ''}`,
+        ),
+      )
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `已更新数据源 ${source.name}，数据结构 ${formatDataShape(describeDataShape(source.data))}${alignedNotes.length ? `；${alignedNotes.join('；')}` : ''}`,
+          },
+        ],
+        details: { id: source.id, shape: describeDataShape(source.data) },
       }
     },
   }
@@ -304,12 +449,95 @@ export function createScreenTools(workspace: Workspace): AgentTool<any>[] {
     execute: async (_id: string, params: any) => {
       const node = findNode(page, params.nodeId)
       if (!node) throw new Error(`组件 ${params.nodeId} 不存在`)
-      if (!page.dataSources.some((item) => item.id === params.dataSourceId)) {
-        throw new Error(`数据源 ${params.dataSourceId} 不存在`)
-      }
+      const source = page.dataSources.find((item) => item.id === params.dataSourceId)
+      if (!source) throw new Error(`数据源 ${params.dataSourceId} 不存在`)
       node.dataId = params.dataSourceId
-      workspace.actions.push(summarize('bind_data_source', `${node.name} ← ${params.dataSourceId}`))
-      return { content: [{ type: 'text', text: `已把数据源绑定到 ${node.name}` }], details: { nodeId: node.id } }
+      // 绑定后组件的数据整体换成数据源的数据，encode 不对齐会渲染成空图
+      const aligned = alignChartEncode(node, source.data)
+      const note = aligned.reason ? `；${aligned.reason}` : ''
+      workspace.actions.push(
+        summarize('bind_data_source', `${node.name} ← ${source.name}(${source.id})${note}`),
+      )
+      return {
+        content: [{ type: 'text', text: `已把数据源 ${source.name} 绑定到 ${node.name}${note}` }],
+        details: {
+          nodeId: node.id,
+          dataSourceId: source.id,
+          shape: describeDataShape(source.data),
+          encode: aligned.encode,
+        },
+      }
+    },
+  }
+
+  const setNodeEventTool: AgentTool<any> = {
+    name: 'set_node_event',
+    label: '设置组件事件',
+    description:
+      '为组件写入或覆盖一个事件。type 取 click / dblclick / vnodeMounted。code 是函数体，直接写语句不要包 function；沙箱内可用 context、console、Math、JSON。常用 context API：setProp / setStyle / getNode / trigger / dispatch / refreshNodesByDataId。',
+    parameters: Type.Object({
+      nodeId: Type.String({ description: '组件 id' }),
+      type: Type.String({ description: '事件类型，如 click / dblclick / vnodeMounted' }),
+      name: Type.Optional(
+        Type.String({ description: '事件名，默认与 type 相同，用于跨组件 dispatch' }),
+      ),
+      title: Type.Optional(Type.String({ description: '事件显示标题' })),
+      code: Type.String({
+        description: '函数体代码，如 context.setProp("id", "content", "新文字")',
+      }),
+    }),
+    execute: async (_id: string, params: any) => {
+      const node: any = findNode(page, params.nodeId)
+      if (!node) throw new Error(`组件 ${params.nodeId} 不存在`)
+      if (!params.code?.trim()) throw new Error('事件代码不能为空')
+
+      if (!Array.isArray(node.events)) node.events = []
+      const name = params.name || params.type
+      const event = {
+        type: params.type,
+        name,
+        title: params.title || name,
+        code: params.code,
+      }
+      const index = node.events.findIndex((item: any) => item.type === params.type)
+      if (index === -1) node.events.push(event)
+      else node.events[index] = { ...node.events[index], ...event }
+
+      workspace.actions.push(
+        summarize(
+          'set_node_event',
+          `${node.name}(${node.id}) ${params.type} 事件，代码 ${params.code.length} 字符`,
+        ),
+      )
+      return {
+        content: [{ type: 'text', text: `已为 ${node.name} 设置 ${params.type} 事件` }],
+        details: { nodeId: node.id, type: params.type, name },
+      }
+    },
+  }
+
+  const removeNodeEventTool: AgentTool<any> = {
+    name: 'remove_node_event',
+    label: '删除组件事件',
+    description: '删除组件的某个事件。',
+    parameters: Type.Object({
+      nodeId: Type.String({ description: '组件 id' }),
+      type: Type.String({ description: '事件类型，如 click' }),
+    }),
+    execute: async (_id: string, params: any) => {
+      const node: any = findNode(page, params.nodeId)
+      if (!node) throw new Error(`组件 ${params.nodeId} 不存在`)
+      const before = node.events?.length ?? 0
+      node.events = (node.events || []).filter((item: any) => item.type !== params.type)
+      if (node.events.length === before)
+        throw new Error(`组件 ${node.name} 没有 ${params.type} 事件`)
+      workspace.actions.push(
+        summarize('remove_node_event', `${node.name}(${node.id}) 删除 ${params.type}`),
+      )
+      return {
+        content: [{ type: 'text', text: `已删除 ${node.name} 的 ${params.type} 事件` }],
+        details: { nodeId: node.id },
+      }
     },
   }
 
@@ -319,11 +547,18 @@ export function createScreenTools(workspace: Workspace): AgentTool<any>[] {
     description: '列出当前画布所有组件的 id、名称、类型与布局。',
     parameters: Type.Object({}),
     execute: async () => {
-      const lines = page.nodes.map(
-        (node) => `${node.name}｜id=${node.id}｜type=${node.type}｜layout=${JSON.stringify(node.layout)}｜dataId=${node.dataId ?? '无'}`,
-      )
+      const lines = page.nodes.map((node) => {
+        const selected = workspace.selectedNodeIds?.includes(node.id) ? '｜选中' : ''
+        const events = node.events?.length
+          ? `｜events=${node.events.map((item) => item.type).join(',')}`
+          : ''
+        return `${node.name}｜id=${node.id}｜type=${node.type}｜layout=${JSON.stringify(node.layout)}｜dataId=${node.dataId ?? '无'}${selected}${events}`
+      })
       workspace.actions.push(summarize('list_nodes', `${page.nodes.length} 个组件`))
-      return { content: [{ type: 'text', text: lines.join('\n') || '画布为空' }], details: { count: page.nodes.length } }
+      return {
+        content: [{ type: 'text', text: lines.join('\n') || '画布为空' }],
+        details: { count: page.nodes.length },
+      }
     },
   }
 
@@ -337,12 +572,18 @@ export function createScreenTools(workspace: Workspace): AgentTool<any>[] {
     arrangeGridTool,
     setCanvasTool,
     addDataSourceTool,
+    updateDataSourceTool,
     bindDataSourceTool,
+    setNodeEventTool,
+    removeNodeEventTool,
     listNodesTool,
   ]
 }
 
 function demoStaticData(name: string) {
   const labels = ['一月', '二月', '三月', '四月', '五月', '六月']
-  return labels.map((label, index) => ({ label, value: Math.round((Math.sin(index + name.length) + 1.5) * 100) }))
+  return labels.map((label, index) => ({
+    label,
+    value: Math.round((Math.sin(index + name.length) + 1.5) * 100),
+  }))
 }
