@@ -15,15 +15,17 @@ const message = ref('')
 const editorStore = useEditorStore()
 const { page, selectedNodeIds } = storeToRefs(editorStore)
 
+const activeRunId = ref<string | null>(null)
+
 const { messages, values, submit, isLoading, stop, client } = useStream({
   apiUrl: 'http://localhost:2024',
   assistantId: 'screen_design_agent',
   // 可改websoket
   transport: 'sse',
   threadId: getThreadId(),
-  onThreadId(threadId) {
-    // 和ai交互时传给commands接口的threadId 将之前的uuid传入useStream可以实现持久化，内部会调
-    setThreadId(threadId)
+  onThreadId: setThreadId,
+  onCreated({ runId }) {
+    activeRunId.value = runId
   },
 })
 
@@ -82,7 +84,13 @@ function onkeydown(e: KeyboardEvent) {
   onSubmit()
 }
 
-function onStop() {
+async function onStop() {
+  const threadId = getThreadId()
+  const runId = activeRunId.value
+  if (!threadId || !runId) return
+
+  await client.runs.cancel(threadId, runId, true, 'rollback')
+
   stop()
 }
 

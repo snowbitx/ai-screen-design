@@ -17,6 +17,13 @@ const visibleMessages = computed(() => {
     (item, index) => item.text || (lastIndex === index && props.isLoading),
   )
 })
+
+// 结构化输出阶段不会产生 AI 消息，用 loading 气泡提供即时反馈
+const showAiLoading = computed(() => {
+  if (!props.isLoading) return false
+  return props.messages.at(-1)?.type !== 'ai'
+})
+
 let isScroll = true
 onMounted(() => {
   const resizeObserver = new ResizeObserver(() => {
@@ -60,6 +67,14 @@ function onScroll() {
             :final="true"
           />
           <span v-else class="typing">...</span>
+        </div>
+      </div>
+      <div v-if="showAiLoading" class="message-box ai flex gap-10 overflow-auto -m-20 p-20">
+        <el-avatar class="avatar" :size="28">
+          <Icon icon="mdi:robot-outline" />
+        </el-avatar>
+        <div class="message-content">
+          <span class="typing">...</span>
         </div>
       </div>
     </div>
