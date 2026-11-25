@@ -153,7 +153,14 @@ export const useEditorStore = defineStore('editor', () => {
     applyChange(node, 'locked', !node.locked)
   }
 
-  function updateNode(id, newNode) {
+  function updateNode(id: string | MaterialSchema, newNode?: MaterialSchema) {
+    if (typeof id === 'object') {
+      newNode = id
+      id = id.id
+    }
+
+    if (!newNode) return
+
     const newNodes = nodes.value.map((node) => (node.id === id ? newNode : node))
     setNodes(newNodes)
   }

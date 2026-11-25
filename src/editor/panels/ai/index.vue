@@ -6,6 +6,7 @@ import { storeToRefs } from 'pinia'
 import { useEditorStore } from '@/stores/editor.ts'
 import { getAllMaterialSchema } from '@/materials'
 import { CanvasSchema } from '@/editor/schema/common.ts'
+import { deepClone } from '@/utils'
 
 defineOptions({
   name: 'AiPanel',
@@ -29,30 +30,21 @@ const { messages, values, submit, isLoading, stop, client } = useStream({
   },
 })
 
-/**
- * update_node 流程：
- * 1. 用户先在画布中选中一个节点
- * 2. 输入修改要求
- * 3. classifyTask 返回 edit/update_node
- * 4. handleEditTask 取得 selectedNodeIds[0]
- * 5. 从 page.nodes 找到当前节点
- * 6. 根据 node.type 找到物料 configSchema
- * 7. 大模型生成修改后的完整节点和回复消息
- * 8. Graph State 输出 update_node action
- * 9. 前端调用 editorStore.updateNode()
- * 10. 画布中的原节点被替换
- */
-watch(
-  () => values.value.action,
-  (action: any) => {
-    if (!action) return
+const actionMethodMap = {
+  add_node: 'addNode',
+  update_node: 'updateNode',
+  remove_node: 'removeNode',
+} as const
 
-    if (action.type === 'add_node') {
-      console.log('action.node ==> ', action.node)
-      editorStore.addNode(toRaw(action.node))
-    } else if (action.type === 'update_node') {
-      console.log('action.node ==> ', action.node)
-      editorStore.updateNode(action.node.id, toRaw(action.node))
+watch(
+  () => values.value.actions,
+  (actions: any[]) => {
+    if (!actions?.length) return
+
+    for (const action of actions) {
+      const method = actionMethodMap[action.type]
+      if (!method) continue
+      editorStore[method](deepClone(toRaw(action.node)))
     }
   },
 )
