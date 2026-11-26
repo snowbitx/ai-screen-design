@@ -7,6 +7,7 @@ import { useEditorStore } from '@/stores/editor.ts'
 import { getAllMaterialSchema } from '@/materials'
 import { CanvasSchema } from '@/editor/schema/common.ts'
 import { deepClone } from '@/utils'
+import { toJSONSchema } from '@/utils/agent-schema.ts'
 
 defineOptions({
   name: 'AiPanel',
@@ -63,7 +64,7 @@ function onSubmit() {
     selectedNodeIds: selectedNodeIds.value,
     schema: {
       material: getAllMaterialSchema(),
-      canvas: CanvasSchema.toJSONSchema(),
+      canvas: toJSONSchema(CanvasSchema),
     },
   })
   message.value = ''

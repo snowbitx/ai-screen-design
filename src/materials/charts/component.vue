@@ -25,7 +25,7 @@ const option = computed(() => {
     ..._option,
     dataset: {
       ..._option.dataset,
-      source: data.value || _option.dataset.source,
+      source: data.value || _option?.dataset?.source,
     },
   }
 })

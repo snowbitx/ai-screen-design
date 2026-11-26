@@ -2,7 +2,9 @@
 import { z } from 'zod'
 
 // 描述键名为字符串、值为任意 JSON 值的普通对象。
-export const JsonObjectSchema = z.record(z.string(), z.json())
+export const JsonObjectSchema = z.record(z.string(), z.json()).meta({
+  additionalProperties: true,
+})
 
 // 描述所有物料节点共用的位置和尺寸信息。
 export const LayoutSchema = z

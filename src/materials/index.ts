@@ -1,4 +1,5 @@
 import type { MaterialDefinition, MaterialSchema } from '@/schema/material.ts'
+import { toJSONSchema } from '@/utils/agent-schema.ts'
 // 存放所有的物料
 const materials: MaterialDefinition[] = []
 
@@ -67,7 +68,7 @@ export function getAllMaterialSchema() {
       type: item.schema.type,
       name: item.name,
       // zod格式是js对象要通过http传要转成标准scema
-      configSchema: item.configSchema.toJSONSchema(),
+      configSchema: toJSONSchema(item.configSchema),
     }
   })
 }
